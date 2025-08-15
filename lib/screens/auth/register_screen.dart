@@ -23,16 +23,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _rePasswordController = TextEditingController();
   final _nameController = TextEditingController();
-  final _passwordVisible = ValueNotifier<bool>(false);
-  final _passwordVisible2 = ValueNotifier<bool>(false);
+  bool _obscure = true;
+  bool _obscure2 = true;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     _nameController.dispose();
-    _passwordVisible.dispose();
-    _passwordVisible2.dispose();
     super.dispose();
   }
 
@@ -62,9 +60,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ),
             backgroundColor: Colors.transparent,
             elevation: 0,
-            pinned: false, // biar appbar hilang saat scroll
+            pinned: false,
             floating: false,
-            expandedHeight: 0, // bisa diatur jika mau expandable
+            expandedHeight: 0,
           ),
         ],
         body: SingleChildScrollView(
@@ -112,71 +110,56 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     validator: (value) => ValidationHelper.validateEmail(value),
                   ),
                   const SizedBox(height: 16),
-                  ValueListenableBuilder<bool>(
-                    valueListenable: _passwordVisible,
-                    builder: (context, isVisible, child) {
-                      return CustomTextFormField(
-                        controller: _passwordController,
-                        labelText: 'Password',
-                        obscureText: !isVisible,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            isVisible ? Icons.visibility : Icons.visibility_off,
+                  CustomTextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscure,
+                    labelText: 'Password',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscure ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () => setState(() => _obscure = !_obscure),
+                    ),
+                    validator: (value) =>
+                        ValidationHelper.validateMultiple(value, [
+                          (v) =>
+                              ValidationHelper.validateNotEmpty(v, 'Password'),
+                          (v) => ValidationHelper.validateMinLength(
+                            v,
+                            8,
+                            'Password',
                           ),
-                          onPressed: () => _passwordVisible.value = !isVisible,
-                        ),
-                        validator: (value) =>
-                            ValidationHelper.validateMultiple(value, [
-                              (v) => ValidationHelper.validateNotEmpty(
-                                v,
-                                'Password',
-                              ),
-                              (v) => ValidationHelper.validateMinLength(
-                                v,
-                                8,
-                                'Password',
-                              ),
-                            ]),
-                      );
-                    },
+                        ]),
                   ),
                   const SizedBox(height: 16),
-                  ValueListenableBuilder<bool>(
-                    valueListenable: _passwordVisible2,
-                    builder: (context, isVisible2, child) {
-                      return CustomTextFormField(
-                        controller: _rePasswordController,
-                        labelText: 'Ulangi Password',
-                        obscureText: !isVisible2,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            isVisible2
-                                ? Icons.visibility
-                                : Icons.visibility_off,
+                  CustomTextFormField(
+                    controller: _rePasswordController,
+                    labelText: 'Ulangi Password',
+                    obscureText: _obscure2,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscure2 ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () => setState(() => _obscure2 = !_obscure2),
+                    ),
+                    validator: (value) =>
+                        ValidationHelper.validateMultiple(value, [
+                          (v) => ValidationHelper.validateNotEmpty(
+                            v,
+                            'Ulangi Password',
                           ),
-                          onPressed: () =>
-                              _passwordVisible2.value = !isVisible2,
-                        ),
-                        validator: (value) =>
-                            ValidationHelper.validateMultiple(value, [
-                              (v) => ValidationHelper.validateNotEmpty(
-                                v,
-                                'Ulangi Password',
-                              ),
-                              (v) => ValidationHelper.validateMinLength(
-                                v,
-                                8,
-                                'Ulangi Password',
-                              ),
-                              (v) {
-                                if (v != _passwordController.text) {
-                                  return 'Password tidak sama';
-                                }
-                                return null;
-                              },
-                            ]),
-                      );
-                    },
+                          (v) => ValidationHelper.validateMinLength(
+                            v,
+                            8,
+                            'Ulangi Password',
+                          ),
+                          (v) {
+                            if (v != _passwordController.text) {
+                              return 'Password tidak sama';
+                            }
+                            return null;
+                          },
+                        ]),
                   ),
                   const SizedBox(height: 24),
                   CustomButton(

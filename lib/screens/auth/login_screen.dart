@@ -21,13 +21,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _passwordVisible = ValueNotifier<bool>(false);
+  bool _obscure = true;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _passwordVisible.dispose();
     super.dispose();
   }
 
@@ -45,7 +44,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -85,33 +83,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     validator: (value) => ValidationHelper.validateEmail(value),
                   ),
                   const SizedBox(height: 16),
-                  ValueListenableBuilder<bool>(
-                    valueListenable: _passwordVisible,
-                    builder: (context, isVisible, child) {
-                      return CustomTextFormField(
-                        controller: _passwordController,
-                        labelText: 'Password',
-                        obscureText: !isVisible,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            isVisible ? Icons.visibility : Icons.visibility_off,
+                  CustomTextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscure,
+                    labelText: 'Password',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscure ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () => setState(() => _obscure = !_obscure),
+                    ),
+                    validator: (value) =>
+                        ValidationHelper.validateMultiple(value, [
+                          (v) =>
+                              ValidationHelper.validateNotEmpty(v, 'Password'),
+                          (v) => ValidationHelper.validateMinLength(
+                            v,
+                            8,
+                            'Password',
                           ),
-                          onPressed: () => _passwordVisible.value = !isVisible,
-                        ),
-                        validator: (value) =>
-                            ValidationHelper.validateMultiple(value, [
-                              (v) => ValidationHelper.validateNotEmpty(
-                                v,
-                                'Password',
-                              ),
-                              (v) => ValidationHelper.validateMinLength(
-                                v,
-                                8,
-                                'Password',
-                              ),
-                            ]),
-                      );
-                    },
+                        ]),
                   ),
                   // const SizedBox(height: 12),
                   // Align(

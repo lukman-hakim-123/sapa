@@ -25,7 +25,12 @@ class Auth extends _$Auth {
     state = const AsyncValue.loading();
     final result = await _authService.login(email: email, password: password);
     if (result.isSuccess) {
-      state = AsyncValue.data(result.resultValue);
+      final user = result.resultValue;
+      state = AsyncValue.data(user);
+
+      if (user != null) {
+        await _userProfileNotifier.fetchUserProfile(user.$id);
+      }
     } else {
       state = AsyncValue.error(result.errorMessage!, StackTrace.current);
       resetState();
@@ -61,6 +66,7 @@ class Auth extends _$Auth {
   }
 
   Future<void> logout() async {
+    if (state.value == null) return;
     state = const AsyncValue.loading();
     final result = await _authService.logout();
     if (result.isSuccess) {
@@ -84,6 +90,7 @@ class Auth extends _$Auth {
       if (sessionResult.isSuccess) {
         final userResult = await _authService.getCurrentUser();
         if (userResult.isSuccess) {
+          state = AsyncValue.data(userResult.resultValue);
           return userResult.resultValue;
         }
       }

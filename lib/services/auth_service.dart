@@ -3,10 +3,14 @@ import 'package:appwrite/models.dart' as models;
 import '../models/result.dart';
 
 abstract class IAuthService {
-  Future<Result<models.User>> createAccount(
-      {required String email, required String password});
-  Future<Result<models.User>> login(
-      {required String email, required String password});
+  Future<Result<models.User>> createAccount({
+    required String email,
+    required String password,
+  });
+  Future<Result<models.User>> login({
+    required String email,
+    required String password,
+  });
   Future<Result<models.User>> getCurrentUser();
   Future<Result<models.Session>> getCurrentSession();
   Future<Result<void>> logout();
@@ -25,27 +29,40 @@ class AuthService implements IAuthService {
   }) async {
     try {
       final user = await _account.create(
-        userId: 'unique()', 
+        userId: 'unique()',
         email: email,
         password: password,
         name: name,
       );
 
-      return Result.success(user); 
+      return Result.success(user);
     } on AppwriteException catch (e) {
       return Result.failed(e.message.toString());
     }
   }
 
   @override
-  Future<Result<models.User>> login(
-      {required String email, required String password}) async {
+  Future<Result<models.User>> login({
+    required String email,
+    required String password,
+  }) async {
     try {
       await _account.createEmailPasswordSession(
-          email: email, password: password);
+        email: email,
+        password: password,
+      );
       final user = await _account.get();
       return Result.success(user);
     } on AppwriteException catch (e) {
+      String? message = e.message;
+      if (message?.contains('please check the email and password') ?? false) {
+        message = 'Email atau password salah';
+        return Result.failed(message);
+      }
+      if (message?.contains('Rate limit for the current endpoint') ?? false) {
+        message = 'Terlalu banyak percobaan. Mohon tunggu beberapa saat.';
+        return Result.failed(message);
+      }
       return Result.failed(e.message.toString());
     }
   }

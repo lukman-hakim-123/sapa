@@ -22,7 +22,7 @@ class ProdukScreen extends ConsumerWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            context.go('/dashboard');
+            context.go('/bottomNav');
           },
         ),
       ),
@@ -52,7 +52,9 @@ class ProdukScreen extends ConsumerWidget {
                   title: Text(
                     produk.namaProduk,
                     style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,9 +64,10 @@ class ProdukScreen extends ConsumerWidget {
                       Text(
                         'Rp ${produk.hargaJual.toStringAsFixed(0)}',
                         style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
                       ),
                     ],
                   ),
@@ -79,9 +82,8 @@ class ProdukScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Terjadi kesalahan: $error'),
-        ),
+        error: (error, stack) =>
+            Center(child: Text('Terjadi kesalahan: $error')),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToAddProduk(context),
@@ -100,7 +102,10 @@ class ProdukScreen extends ConsumerWidget {
   }
 
   Future<void> _deleteProduk(
-      BuildContext context, WidgetRef ref, String produkId) async {
+    BuildContext context,
+    WidgetRef ref,
+    String produkId,
+  ) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(

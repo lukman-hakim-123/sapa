@@ -40,4 +40,29 @@ class ValidationHelper {
     }
     return null;
   }
+
+  static String? validateOptionalMinLength(
+    String? value,
+    int minLength,
+    String fieldName,
+  ) {
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+    if (value.length < minLength) {
+      return '$fieldName harus minimal $minLength huruf';
+    }
+    return null;
+  }
+
+  static String? validatePasswordOnEmailChange(
+    String? value,
+    String oldEmail,
+    String newEmail,
+  ) {
+    if (oldEmail != newEmail && (value == null || value.isEmpty)) {
+      return 'Password lama tidak boleh kosong';
+    }
+    return null;
+  }
 }

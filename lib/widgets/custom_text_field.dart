@@ -37,6 +37,8 @@ class CustomTextFormField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
+        filled: true,
+        fillColor: Colors.white,
         prefixIcon: prefixIcon != null
             ? Icon(
                 prefixIcon,
