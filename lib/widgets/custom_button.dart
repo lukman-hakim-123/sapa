@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'custom_text.dart';
 
 class CustomButton extends StatelessWidget {
-  final String text;
+  final String? text;
   final void Function()? onPressed;
   final double height;
   final double borderRadius;
   final Color? backgroundColor;
   final TextStyle? textStyle;
   final bool isLoading;
+  final Widget? child;
 
   const CustomButton({
     super.key,
-    required this.text,
+    this.text,
     this.onPressed,
     this.height = 50,
     this.borderRadius = 12,
     this.backgroundColor,
     this.textStyle,
+    this.child,
     this.isLoading = false,
   });
 
@@ -40,16 +43,17 @@ class CustomButton extends StatelessWidget {
         onPressed: isLoading ? null : onPressed,
         child: isLoading
             ? const SizedBox(
-                width: 20,
-                height: 20,
+                width: 20.0,
+                height: 20.0,
                 child: CircularProgressIndicator(color: Colors.white),
               )
-            : Text(
-                text,
-                style:
-                    textStyle ??
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+            : child ??
+                  CustomText(
+                    text: text ?? '',
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
       ),
     );
   }

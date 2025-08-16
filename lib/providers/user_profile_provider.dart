@@ -102,7 +102,6 @@ class UserProfileNotifier extends _$UserProfileNotifier {
   ) async {
     if (photoFile == null) return profile;
 
-    // Hapus foto lama dulu jika ada
     if (profile.foto.isNotEmpty) {
       try {
         await _userProfileService.deleteProfileImage(profile.foto);
@@ -112,12 +111,9 @@ class UserProfileNotifier extends _$UserProfileNotifier {
       }
     }
 
-    final random = Random().nextInt(99999); // 0 - 99999
-    final fileId = '${profile.id}_$random';
-
     final uploadedFileId = await _userProfileService.uploadProfileImage(
       photoFile,
-      fileId,
+      'profile_${profile.id}',
     );
 
     if (uploadedFileId != null) {

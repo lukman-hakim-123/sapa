@@ -68,11 +68,8 @@ class UserProfileService {
     try {
       final result = await _storage.createFile(
         bucketId: dotenv.env['APPWRITE_PROFILE_BUCKET_ID']!,
-        fileId: 'profile_$userId',
-        file: InputFile.fromPath(
-          path: file.path,
-          filename: 'profile_$userId.jpg',
-        ),
+        fileId: ID.unique(),
+        file: InputFile.fromPath(path: file.path, filename: userId),
       );
       return result.$id;
     } catch (e) {

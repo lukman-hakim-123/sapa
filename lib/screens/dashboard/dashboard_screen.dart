@@ -14,7 +14,7 @@ class DashboardScreen extends ConsumerWidget {
     {
       'icon': 'assets/icons/anak.svg',
       'label': 'Identitas Anak',
-      'route': '/bottomNav',
+      'route': '/anak',
       'color': Color(0xFFFFD7B5),
       'sub': 'data profil anak',
     },
@@ -56,7 +56,7 @@ class DashboardScreen extends ConsumerWidget {
 
   List<int> getLockedMenus(int userLevel) {
     if (userLevel == 3) {
-      return [0, 1, 3];
+      return [1, 3];
     } else if (userLevel == 2) {
       return [3];
     } else {
@@ -133,6 +133,36 @@ class DashboardScreen extends ConsumerWidget {
                                           fit: BoxFit.cover,
                                           width: 100,
                                           height: 100,
+                                          loadingBuilder: (context, child, loadingProgress) {
+                                            if (loadingProgress == null) {
+                                              return child;
+                                            }
+                                            return Center(
+                                              child: SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  value:
+                                                      loadingProgress
+                                                              .expectedTotalBytes !=
+                                                          null
+                                                      ? loadingProgress
+                                                                .cumulativeBytesLoaded /
+                                                            loadingProgress
+                                                                .expectedTotalBytes!
+                                                      : null,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  const Icon(
+                                                    Icons.error,
+                                                    color: Colors.red,
+                                                    size: 40,
+                                                  ),
                                         ),
                                       )
                                     : Icon(
