@@ -21,7 +21,7 @@ class DashboardScreen extends ConsumerWidget {
     {
       'icon': 'assets/icons/evaluasi.svg',
       'label': 'STPPA',
-      'route': '/bottomNav',
+      'route': '/stppa',
       'color': Color(0xFFFBBBC1),
       'sub': 'standar pencapaian perkembangan anak',
     },
@@ -35,7 +35,7 @@ class DashboardScreen extends ConsumerWidget {
     {
       'icon': 'assets/icons/add_guru.svg',
       'label': 'Tambah Guru',
-      'route': '/bottomNav',
+      'route': '/guru',
       'color': Color(0xFFD5C4B0),
       'sub': 'tambah akun guru',
     },
@@ -76,7 +76,6 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-
       body: authState.when(
         data: (user) {
           return userProfileState.when(
@@ -171,10 +170,9 @@ class DashboardScreen extends ConsumerWidget {
                                         color: Colors.white,
                                       ),
                               ),
-
                               const SizedBox(width: 16),
                               CustomText(
-                                text: user!.name,
+                                text: profile.nama,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),

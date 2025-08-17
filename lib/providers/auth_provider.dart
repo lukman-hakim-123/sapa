@@ -43,7 +43,6 @@ class Auth extends _$Auth {
     final authResult = await _authService.createAccount(
       email: email,
       password: password,
-      name: nama,
     );
 
     if (authResult.isSuccess) {

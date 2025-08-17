@@ -3,22 +3,22 @@ import 'dart:io';
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/result.dart';
-import '../models/anak_model.dart';
+import '../models/user_profile_model.dart';
 
-class AnakService {
+class GuruService {
   late final Databases _db;
   late final Storage _storage;
 
-  AnakService({required Databases db, required Storage storage})
+  GuruService({required Databases db, required Storage storage})
     : _db = db,
       _storage = storage;
 
-  Future<Result<AnakModel>> createAnak(AnakModel anak) async {
+  Future<Result<UserProfile>> createGuru(UserProfile guru) async {
     try {
-      final jsonForCreate = toJsonForCreate(anak);
+      final jsonForCreate = toJsonForCreate(guru);
       final document = await _db.createDocument(
         databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
-        collectionId: dotenv.env['APPWRITE_ANAK_COLLECTION_ID']!,
+        collectionId: dotenv.env['APPWRITE_USERS_COLLECTION_ID']!,
         documentId: 'unique()',
         data: jsonForCreate,
       );
@@ -27,93 +27,56 @@ class AnakService {
         document.data,
       );
       data['id'] = document.$id;
-      return Result.success(AnakModel.fromJson(data));
+      return Result.success(UserProfile.fromJson(data));
     } catch (e) {
       return Result.failed(e.toString());
     }
   }
 
-  Future<Result<List<AnakModel>>> getAllAnak() async {
+  Future<Result<List<UserProfile>>> getAllGuru() async {
     try {
       final documents = await _db.listDocuments(
         databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
-        collectionId: dotenv.env['APPWRITE_ANAK_COLLECTION_ID']!,
+        collectionId: dotenv.env['APPWRITE_USERS_COLLECTION_ID']!,
+        queries: [Query.equal('level_user', 2)],
       );
-      final anakList = documents.documents.map((doc) {
+      final guruList = documents.documents.map((doc) {
         final Map<String, dynamic> data = Map<String, dynamic>.from(doc.data);
         data['id'] = data['\$id'];
         data.remove('\$id');
-        return AnakModel.fromJson(data);
+        return UserProfile.fromJson(data);
       }).toList();
-      return Result.success(anakList);
+      return Result.success(guruList);
     } catch (e) {
       return Result.failed(e.toString());
     }
   }
 
-  Future<Result<List<AnakModel>>> getAnakByEmail(String email) async {
-    try {
-      final documents = await _db.listDocuments(
-        databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
-        collectionId: dotenv.env['APPWRITE_ANAK_COLLECTION_ID']!,
-        queries: [Query.equal('email', email)],
-      );
-      final anakList = documents.documents.map((doc) {
-        final Map<String, dynamic> data = Map<String, dynamic>.from(doc.data);
-        data['id'] = data['\$id'];
-        data.remove('\$id');
-        return AnakModel.fromJson(data);
-      }).toList();
-      return Result.success(anakList);
-    } catch (e) {
-      return Result.failed(e.toString());
-    }
-  }
-
-  Future<Result<List<AnakModel>>> getAnakByGuru(String guruId) async {
-    try {
-      final documents = await _db.listDocuments(
-        databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
-        collectionId: dotenv.env['APPWRITE_ANAK_COLLECTION_ID']!,
-        queries: [Query.equal('guruId', guruId)],
-      );
-      final anakList = documents.documents.map((doc) {
-        final Map<String, dynamic> data = Map<String, dynamic>.from(doc.data);
-        data['id'] = data['\$id'];
-        data.remove('\$id');
-        return AnakModel.fromJson(data);
-      }).toList();
-      return Result.success(anakList);
-    } catch (e) {
-      return Result.failed(e.toString());
-    }
-  }
-
-  Future<Result<AnakModel>> getAnakById(String anakId) async {
+  Future<Result<UserProfile>> getGuruById(String guruId) async {
     try {
       final document = await _db.getDocument(
         databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
-        collectionId: dotenv.env['APPWRITE_ANAK_COLLECTION_ID']!,
-        documentId: anakId,
+        collectionId: dotenv.env['APPWRITE_USERS_COLLECTION_ID']!,
+        documentId: guruId,
       );
       final Map<String, dynamic> data = Map<String, dynamic>.from(
         document.data,
       );
       data['id'] = data['\$id'];
       data.remove('\$id');
-      return Result.success(AnakModel.fromJson(data));
+      return Result.success(UserProfile.fromJson(data));
     } catch (e) {
       return Result.failed(e.toString());
     }
   }
 
-  Future<Result<AnakModel>> updateAnak(AnakModel anak) async {
+  Future<Result<UserProfile>> updateGuru(UserProfile guru) async {
     try {
-      final jsonForCreate = toJsonForCreate(anak);
+      final jsonForCreate = toJsonForCreate(guru);
       final document = await _db.updateDocument(
         databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
-        collectionId: dotenv.env['APPWRITE_ANAK_COLLECTION_ID']!,
-        documentId: anak.id,
+        collectionId: dotenv.env['APPWRITE_USERS_COLLECTION_ID']!,
+        documentId: guru.id,
         data: jsonForCreate,
       );
       final Map<String, dynamic> data = Map<String, dynamic>.from(
@@ -121,18 +84,18 @@ class AnakService {
       );
       data['id'] = data['\$id'];
       data.remove('\$id');
-      return Result.success(AnakModel.fromJson(data));
+      return Result.success(UserProfile.fromJson(data));
     } catch (e) {
       return Result.failed(e.toString());
     }
   }
 
-  Future<Result<void>> deleteAnak(String anakId) async {
+  Future<Result<void>> deleteGuru(String guruId) async {
     try {
       await _db.deleteDocument(
         databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
-        collectionId: dotenv.env['APPWRITE_ANAK_COLLECTION_ID']!,
-        documentId: anakId,
+        collectionId: dotenv.env['APPWRITE_USERS_COLLECTION_ID']!,
+        documentId: guruId,
       );
       return Result.success(null);
     } catch (e) {

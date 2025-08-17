@@ -1,32 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../providers/anak_provider.dart';
-import '../../providers/user_profile_provider.dart';
-import '../../widgets/app_colors.dart';
-import '../../widgets/custom_button.dart';
-import '../../widgets/custom_text.dart';
-import '../../widgets/custom_text_field.dart';
+import '../../../providers/guru_provider.dart';
+import '../../../providers/user_profile_provider.dart';
+import '../../../widgets/app_colors.dart';
+import '../../../widgets/custom_button.dart';
+import '../../../widgets/custom_text.dart';
+import '../../../widgets/custom_text_field.dart';
 
-class AnakScreen extends ConsumerStatefulWidget {
-  const AnakScreen({super.key});
+class GuruScreen extends ConsumerStatefulWidget {
+  const GuruScreen({super.key});
 
   @override
-  ConsumerState<AnakScreen> createState() => _AnakScreenState();
+  ConsumerState<GuruScreen> createState() => _GuruScreenState();
 }
 
-class _AnakScreenState extends ConsumerState<AnakScreen> {
+class _GuruScreenState extends ConsumerState<GuruScreen> {
   final TextEditingController searchController = TextEditingController();
   String searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
-    final anakState = ref.watch(anakNotifierProvider);
+    final guruState = ref.watch(guruNotifierProvider);
     final userProfileState = ref.watch(userProfileNotifierProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: CustomText(
-          text: 'Data Anak',
+        title: const CustomText(
+          text: 'Data Guru',
           color: Colors.white,
           fontWeight: FontWeight.bold,
           fontSize: 20.0,
@@ -44,10 +45,9 @@ class _AnakScreenState extends ConsumerState<AnakScreen> {
       ),
       body: userProfileState.when(
         data: (profile) {
-          final int userLevel = profile!.level_user;
           return RefreshIndicator(
             onRefresh: () async {
-              ref.invalidate(anakNotifierProvider);
+              ref.invalidate(guruNotifierProvider);
             },
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -67,44 +67,45 @@ class _AnakScreenState extends ConsumerState<AnakScreen> {
                     ),
                   ),
                   const SizedBox(height: 10.0),
-                  if (userLevel != 3)
-                    CustomButton(
-                      onPressed: () {
-                        context.go('/formAnak');
-                      },
-                      height: 45.0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          CustomText(
-                            text: 'Tambah data anak',
-                            color: Colors.white,
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          Icon(Icons.add, color: Colors.white, size: 25.0),
-                        ],
-                      ),
+                  CustomButton(
+                    onPressed: () {
+                      context.go('/formGuru');
+                    },
+                    height: 45.0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        CustomText(
+                          text: 'Tambah data guru',
+                          color: Colors.white,
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        Icon(Icons.add, color: Colors.white, size: 25.0),
+                      ],
                     ),
+                  ),
                   const SizedBox(height: 10.0),
                   Expanded(
-                    child: anakState.when(
-                      data: (anakList) {
-                        if (anakList.isEmpty) {
+                    child: guruState.when(
+                      data: (guruList) {
+                        if (guruList.isEmpty) {
                           return SizedBox(
                             height: MediaQuery.of(context).size.height * 0.5,
                             child: const Center(
                               child: CustomText(
-                                text: 'Belum ada data anak',
+                                text: 'Belum ada data guru',
                                 fontSize: 16,
                               ),
                             ),
                           );
                         }
-                        final filtered = anakList.where((anak) {
-                          return anak.nama.toLowerCase().contains(searchQuery);
+                        final filtered = guruList.where((guru) {
+                          return guru.nama.toLowerCase().contains(
+                                searchQuery,
+                              ) ||
+                              guru.email.toLowerCase().contains(searchQuery);
                         }).toList();
-
                         if (filtered.isEmpty) {
                           return const Center(
                             child: CustomText(
@@ -114,13 +115,12 @@ class _AnakScreenState extends ConsumerState<AnakScreen> {
                           );
                         }
                         final url = ref
-                            .read(anakNotifierProvider.notifier)
+                            .read(guruNotifierProvider.notifier)
                             .getPublicImageUrl;
-
                         return ListView.builder(
                           itemCount: filtered.length,
                           itemBuilder: (context, index) {
-                            final anak = filtered[index];
+                            final guru = filtered[index];
                             return Card(
                               color: Colors.white,
                               child: ListTile(
@@ -129,7 +129,7 @@ class _AnakScreenState extends ConsumerState<AnakScreen> {
                                   backgroundColor: Colors.grey[300],
                                   child: ClipOval(
                                     child: Image.network(
-                                      url(anak.imageId),
+                                      url(guru.foto),
                                       fit: BoxFit.cover,
                                       width: 100,
                                       height: 100,
@@ -167,54 +167,41 @@ class _AnakScreenState extends ConsumerState<AnakScreen> {
                                   ),
                                 ),
                                 title: CustomText(
-                                  text: anak.nama,
+                                  text: guru.nama,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
+                                subtitle: CustomText(
+                                  text: guru.email,
+                                  fontSize: 14,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    CustomText(text: '${anak.usia} tahun'),
-                                    CustomText(
-                                      text: anak.tanggalLahir,
-                                      fontSize: 12,
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.edit,
+                                        color: Colors.blue,
+                                      ),
+                                      onPressed: () {
+                                        context.go('/formGuru', extra: guru);
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
+                                      ),
+                                      onPressed: () =>
+                                          _deleteGuru(context, ref, guru.id),
                                     ),
                                   ],
                                 ),
-                                trailing: userLevel != 3
-                                    ? Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.edit,
-                                              color: Colors.blue,
-                                            ),
-                                            onPressed: () {
-                                              context.go(
-                                                '/formAnak',
-                                                extra: anak,
-                                              );
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.delete,
-                                              color: Colors.red,
-                                            ),
-                                            onPressed: () => _deleteAnak(
-                                              context,
-                                              ref,
-                                              anak.id,
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    : null,
-                                onTap: () =>
-                                    context.go('/detailAnak', extra: anak),
+                                onTap: () {
+                                  context.go('/detailGuru', extra: guru);
+                                },
                               ),
                             );
                           },
@@ -242,16 +229,16 @@ class _AnakScreenState extends ConsumerState<AnakScreen> {
     );
   }
 
-  Future<void> _deleteAnak(
+  Future<void> _deleteGuru(
     BuildContext context,
     WidgetRef ref,
-    String anakId,
+    String guruId,
   ) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Hapus Anak'),
-        content: const Text('Apakah Anda yakin ingin menghapus anak ini?'),
+        title: const Text('Hapus Guru'),
+        content: const Text('Apakah Anda yakin ingin menghapus guru ini?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -266,9 +253,9 @@ class _AnakScreenState extends ConsumerState<AnakScreen> {
     );
 
     if (confirm == true) {
-      ref.read(anakNotifierProvider.notifier).deleteAnak(anakId);
+      ref.read(guruNotifierProvider.notifier).deleteGuru(guruId);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Data anak berhasil dihapus')),
+        const SnackBar(content: Text('Data guru berhasil dihapus')),
       );
     }
   }

@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../services/anak_service.dart';
 import '../models/anak_model.dart';
 import '../utils/provider.dart';
+import 'user_profile_provider.dart';
 
 part 'anak_provider.g.dart';
 
@@ -16,11 +17,30 @@ class AnakNotifier extends _$AnakNotifier {
 
   @override
   Future<List<AnakModel>> build() async {
-    final result = await _anakService.getAllAnak();
-    if (result.isSuccess) {
-      return result.resultValue ?? [];
+    final profile = await ref.watch(userProfileNotifierProvider.future);
+    final level = profile!.level_user;
+
+    if (level == 2) {
+      final result = await _anakService.getAnakByGuru(profile.id);
+      if (result.isSuccess) {
+        return result.resultValue ?? [];
+      } else {
+        throw Exception(result.errorMessage);
+      }
+    } else if (level == 3) {
+      final result = await _anakService.getAnakByEmail(profile.email);
+      if (result.isSuccess) {
+        return result.resultValue ?? [];
+      } else {
+        throw Exception(result.errorMessage);
+      }
     } else {
-      throw Exception(result.errorMessage);
+      final result = await _anakService.getAllAnak();
+      if (result.isSuccess) {
+        return result.resultValue ?? [];
+      } else {
+        throw Exception(result.errorMessage);
+      }
     }
   }
 
@@ -58,16 +78,16 @@ class AnakNotifier extends _$AnakNotifier {
 
   Future<void> updateAnak(
     AnakModel updatedAnak,
-    AnakModel oldAnak, {
+    AnakModel oldAnak,
     File? photoFile,
-  }) async {
+  ) async {
     state = const AsyncValue.loading();
     try {
       final finalAnak = await _uploadPhoto(
         oldAnak,
         updatedAnak,
         photoFile: photoFile,
-        isCreate: false, // boleh tanpa foto
+        isCreate: false,
       );
 
       final result = await _anakService.updateAnak(finalAnak);
@@ -104,12 +124,15 @@ class AnakNotifier extends _$AnakNotifier {
     File? photoFile,
     bool isCreate = false,
   }) async {
-    if (photoFile == null) {
-      if (isCreate) throw Exception("Foto wajib diunggah saat create");
-      return updatedAnak;
+    if (isCreate && photoFile == null) {
+      throw Exception("Foto wajib diunggah saat create");
     }
 
-    if (!isCreate && oldAnak.imageId.isNotEmpty) {
+    if (!isCreate && photoFile == null) {
+      return updatedAnak.copyWith(imageId: oldAnak.imageId);
+    }
+
+    if (!isCreate && photoFile != null && oldAnak.imageId.isNotEmpty) {
       try {
         await _anakService.deleteProfileImage(oldAnak.imageId);
         print("Old image deleted: ${oldAnak.imageId}");
@@ -119,8 +142,8 @@ class AnakNotifier extends _$AnakNotifier {
     }
 
     final result = await _anakService.uploadProfileImage(
-      photoFile,
-      'anak_${oldAnak.email}',
+      photoFile!,
+      'anak_${updatedAnak.email}',
     );
 
     if (result.isSuccess) {

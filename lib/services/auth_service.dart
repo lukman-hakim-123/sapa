@@ -25,14 +25,12 @@ class AuthService implements IAuthService {
   Future<Result<models.User>> createAccount({
     required String email,
     required String password,
-    String? name,
   }) async {
     try {
       final user = await _account.create(
         userId: 'unique()',
         email: email,
         password: password,
-        name: name,
       );
 
       return Result.success(user);

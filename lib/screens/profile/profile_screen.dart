@@ -34,7 +34,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _obscure = true;
   bool _obscure2 = true;
   bool _obscure3 = true;
-  bool _isUpdating = false;
 
   @override
   void initState() {
@@ -92,10 +91,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               if (profile == null) {
                 return const Center(child: Text("Can't fetch profile"));
               }
-
               _namaController.text = profile.nama;
               _emailController.text = profile.email;
-
               return _buildProfileUI(context, user, profile, false, url);
             },
             loading: () => _buildProfileUI(context, user, null, true, url),

@@ -32,9 +32,10 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
   final _usiaController = TextEditingController();
   final _tanggalLahirController = TextEditingController();
   String? _tanggalLahir;
-
   File? _pickedImage;
   String? gender;
+  bool _isSubmitting = false;
+
   @override
   void initState() {
     super.initState();
@@ -44,7 +45,8 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
       _emailController.text = widget.anak!.email;
       _usiaController.text = widget.anak!.usia.toString();
       _tanggalLahir = widget.anak!.tanggalLahir;
-      _tanggalLahirController.text = widget.anak!.tanggalLahir;
+      _tanggalLahir = widget.anak!.tanggalLahir;
+      _tanggalLahirController.text = _tanggalLahir!;
       gender = widget.anak!.jenisKelamin;
     }
   }
@@ -106,18 +108,45 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
     final anakState = ref.watch(anakNotifierProvider);
     final authState = ref.watch(authProvider);
     final url = ref.read(anakNotifierProvider.notifier).getPublicImageUrl;
-
-    ref.listen<AsyncValue>(anakNotifierProvider, (_, state) {
-      if (state.value != null) {
-        context.go('/anak');
-      } else if (state.hasError) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Gagal: ${state.error}')));
-      }
-    });
-
     final isEdit = widget.anak != null;
+
+    ref.listen<AsyncValue<List<AnakModel>>>(anakNotifierProvider, (_, state) {
+      state.when(
+        data: (listAnak) {
+          if (_isSubmitting) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  isEdit
+                      ? 'Data anak berhasil diperbarui'
+                      : 'Data anak berhasil ditambahkan',
+                ),
+              ),
+            );
+            setState(() => _isSubmitting = false);
+
+            if (isEdit) {
+              final updatedAnak = listAnak.firstWhere(
+                (a) => a.id == widget.anak!.id,
+                orElse: () => widget.anak!,
+              );
+              context.go('/detailAnak', extra: updatedAnak);
+            } else {
+              context.go('/anak');
+            }
+          }
+        },
+        error: (err, _) {
+          if (_isSubmitting) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Gagal menyimpan: $err')));
+            setState(() => _isSubmitting = false);
+          }
+        },
+        loading: () {},
+      );
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -362,7 +391,7 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
               ),
               const SizedBox(height: 24),
               CustomButton(
-                onPressed: anakState.isLoading
+                onPressed: anakState.isLoading || _isSubmitting
                     ? null
                     : () {
                         if (_formKey.currentState!.validate()) {
@@ -382,7 +411,7 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
                             );
                             return;
                           }
-                          if (_pickedImage == null) {
+                          if (!isEdit && _pickedImage == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Foto belum dipilih'),
@@ -390,6 +419,7 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
                             );
                             return;
                           }
+                          setState(() => _isSubmitting = true);
                           authState.when(
                             data: (user) {
                               final updatedModel = AnakModel(
@@ -406,7 +436,11 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
                               if (isEdit) {
                                 ref
                                     .read(anakNotifierProvider.notifier)
-                                    .updateAnak(widget.anak!, updatedModel);
+                                    .updateAnak(
+                                      updatedModel,
+                                      widget.anak!,
+                                      _pickedImage,
+                                    );
                               } else {
                                 ref
                                     .read(anakNotifierProvider.notifier)
@@ -423,6 +457,7 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
                           );
                         }
                       },
+                isLoading: _isSubmitting,
                 text: isEdit ? 'Edit Data Anak' : 'Tambah Anak',
               ),
             ],
