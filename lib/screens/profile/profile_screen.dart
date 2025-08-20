@@ -197,9 +197,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                             if (shouldLogout == true) {
                               await ref.read(authProvider.notifier).logout();
-                              await Future.delayed(
-                                const Duration(milliseconds: 300),
-                              );
+                              // await Future.delayed(
+                              //   const Duration(milliseconds: 300),
+                              // );
                               // ignore: use_build_context_synchronously
                               context.go('/login');
                             }

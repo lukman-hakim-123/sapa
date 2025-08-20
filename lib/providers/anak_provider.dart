@@ -17,9 +17,19 @@ class AnakNotifier extends _$AnakNotifier {
 
   @override
   Future<List<AnakModel>> build() async {
-    final profile = await ref.watch(userProfileNotifierProvider.future);
-    final level = profile!.level_user;
+    final profileAsync = ref.watch(userProfileNotifierProvider);
 
+    if (profileAsync.isLoading) {
+      state = const AsyncValue.loading();
+    }
+    if (profileAsync.hasError) {
+      throw profileAsync.error!;
+    }
+
+    final profile = profileAsync.value;
+    if (profile == null) return [];
+
+    final level = profile.level_user;
     if (level == 2) {
       final result = await _anakService.getAnakByGuru(profile.id);
       if (result.isSuccess) {
@@ -106,15 +116,23 @@ class AnakNotifier extends _$AnakNotifier {
     }
   }
 
-  Future<void> deleteAnak(String anakId) async {
+  Future<void> deleteAnak(AnakModel anak) async {
+    final previous = state.value ?? [];
     state = const AsyncValue.loading();
-    final result = await _anakService.deleteAnak(anakId);
-    if (result.isSuccess) {
-      state = AsyncValue.data(
-        (state.value ?? []).where((anak) => anak.id != anakId).toList(),
-      );
-    } else {
-      state = AsyncValue.error(result.errorMessage!, StackTrace.current);
+
+    try {
+      await _anakService.deleteProfileImage(anak.imageId);
+      final result = await _anakService.deleteAnak(anak.id);
+
+      if (result.isSuccess) {
+        state = AsyncValue.data(
+          previous.where((a) => a.id != anak.id).toList(),
+        );
+      } else {
+        state = AsyncValue.error(result.errorMessage!, StackTrace.current);
+      }
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
     }
   }
 

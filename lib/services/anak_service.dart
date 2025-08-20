@@ -38,6 +38,7 @@ class AnakService {
       final documents = await _db.listDocuments(
         databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
         collectionId: dotenv.env['APPWRITE_ANAK_COLLECTION_ID']!,
+        queries: [Query.orderDesc("\$createdAt")],
       );
       final anakList = documents.documents.map((doc) {
         final Map<String, dynamic> data = Map<String, dynamic>.from(doc.data);
@@ -56,7 +57,7 @@ class AnakService {
       final documents = await _db.listDocuments(
         databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
         collectionId: dotenv.env['APPWRITE_ANAK_COLLECTION_ID']!,
-        queries: [Query.equal('email', email)],
+        queries: [Query.equal('email', email), Query.orderDesc("\$createdAt")],
       );
       final anakList = documents.documents.map((doc) {
         final Map<String, dynamic> data = Map<String, dynamic>.from(doc.data);
@@ -75,7 +76,10 @@ class AnakService {
       final documents = await _db.listDocuments(
         databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
         collectionId: dotenv.env['APPWRITE_ANAK_COLLECTION_ID']!,
-        queries: [Query.equal('guruId', guruId)],
+        queries: [
+          Query.equal('guruId', guruId),
+          Query.orderDesc("\$createdAt"),
+        ],
       );
       final anakList = documents.documents.map((doc) {
         final Map<String, dynamic> data = Map<String, dynamic>.from(doc.data);

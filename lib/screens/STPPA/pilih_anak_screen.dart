@@ -1,34 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sapa/models/user_profile_model.dart';
-import '../../../providers/guru_provider.dart';
-import '../../../providers/user_profile_provider.dart';
-import '../../../widgets/app_colors.dart';
-import '../../../widgets/custom_button.dart';
-import '../../../widgets/custom_text.dart';
-import '../../../widgets/custom_text_field.dart';
+import '../../providers/anak_provider.dart';
+import '../../providers/stppa_provider.dart';
+import '../../providers/user_profile_provider.dart';
+import '../../widgets/app_colors.dart';
+import '../../widgets/custom_text.dart';
+import '../../widgets/custom_text_field.dart';
 
-class GuruScreen extends ConsumerStatefulWidget {
-  const GuruScreen({super.key});
+class PilihAnakScreen extends ConsumerStatefulWidget {
+  const PilihAnakScreen({super.key});
 
   @override
-  ConsumerState<GuruScreen> createState() => _GuruScreenState();
+  ConsumerState<PilihAnakScreen> createState() => _PilihAnakScreenState();
 }
 
-class _GuruScreenState extends ConsumerState<GuruScreen> {
+class _PilihAnakScreenState extends ConsumerState<PilihAnakScreen> {
   final TextEditingController searchController = TextEditingController();
   String searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
-    final guruState = ref.watch(guruNotifierProvider);
+    final anakState = ref.watch(anakNotifierProvider);
     final userProfileState = ref.watch(userProfileNotifierProvider);
+    final selected = ref.watch(selectedAgeKategoriProvider);
+    final selectedUsia = selected?['usia'];
 
     return Scaffold(
       appBar: AppBar(
         title: const CustomText(
-          text: 'Data Guru',
+          text: 'Pilih Anak',
           color: Colors.white,
           fontWeight: FontWeight.bold,
           fontSize: 20.0,
@@ -40,15 +41,24 @@ class _GuruScreenState extends ConsumerState<GuruScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            context.go('/bottomNav');
+            ref.read(selectedAgeKategoriProvider.notifier).state = null;
+            context.go('/stppa');
           },
         ),
       ),
       body: userProfileState.when(
         data: (profile) {
+          if (profile == null) {
+            return RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(anakNotifierProvider);
+              },
+              child: Center(child: Text('profile kosong')),
+            );
+          }
           return RefreshIndicator(
             onRefresh: () async {
-              ref.invalidate(guruNotifierProvider);
+              ref.invalidate(anakNotifierProvider);
             },
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -68,44 +78,22 @@ class _GuruScreenState extends ConsumerState<GuruScreen> {
                     ),
                   ),
                   const SizedBox(height: 10.0),
-                  CustomButton(
-                    onPressed: () {
-                      context.go('/formGuru');
-                    },
-                    height: 45.0,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        CustomText(
-                          text: 'Tambah data guru',
-                          color: Colors.white,
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        Icon(Icons.add, color: Colors.white, size: 25.0),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10.0),
                   Expanded(
-                    child: guruState.when(
-                      data: (guruList) {
-                        if (guruList.isEmpty) {
+                    child: anakState.when(
+                      data: (anakList) {
+                        if (anakList.isEmpty) {
                           return SizedBox(
                             height: MediaQuery.of(context).size.height * 0.5,
                             child: const Center(
                               child: CustomText(
-                                text: 'Belum ada data guru',
+                                text: 'Belum ada data anak',
                                 fontSize: 16,
                               ),
                             ),
                           );
                         }
-                        final filtered = guruList.where((guru) {
-                          return guru.nama.toLowerCase().contains(
-                                searchQuery,
-                              ) ||
-                              guru.email.toLowerCase().contains(searchQuery);
+                        final filtered = anakList.where((anak) {
+                          return anak.nama.toLowerCase().contains(searchQuery);
                         }).toList();
                         if (filtered.isEmpty) {
                           return const Center(
@@ -115,13 +103,26 @@ class _GuruScreenState extends ConsumerState<GuruScreen> {
                             ),
                           );
                         }
+                        if (selectedUsia != null) {
+                          filtered.sort((a, b) {
+                            if (a.usia == selectedUsia &&
+                                b.usia != selectedUsia) {
+                              return -1;
+                            } else if (a.usia != selectedUsia &&
+                                b.usia == selectedUsia) {
+                              return 1;
+                            } else {
+                              return a.usia.compareTo(b.usia);
+                            }
+                          });
+                        }
                         final url = ref
-                            .read(guruNotifierProvider.notifier)
+                            .read(anakNotifierProvider.notifier)
                             .getPublicImageUrl;
                         return ListView.builder(
                           itemCount: filtered.length,
                           itemBuilder: (context, index) {
-                            final guru = filtered[index];
+                            final anak = filtered[index];
                             return Card(
                               color: Colors.white,
                               child: ListTile(
@@ -130,7 +131,7 @@ class _GuruScreenState extends ConsumerState<GuruScreen> {
                                   backgroundColor: Colors.grey[300],
                                   child: ClipOval(
                                     child: Image.network(
-                                      url(guru.foto),
+                                      url(anak.imageId),
                                       fit: BoxFit.cover,
                                       width: 100,
                                       height: 100,
@@ -168,40 +169,22 @@ class _GuruScreenState extends ConsumerState<GuruScreen> {
                                   ),
                                 ),
                                 title: CustomText(
-                                  text: guru.nama,
+                                  text: anak.nama,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
-                                subtitle: CustomText(
-                                  text: guru.email,
-                                  fontSize: 14,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.edit,
-                                        color: Colors.blue,
-                                      ),
-                                      onPressed: () {
-                                        context.go('/formGuru', extra: guru);
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.delete,
-                                        color: Colors.red,
-                                      ),
-                                      onPressed: () =>
-                                          _deleteGuru(context, ref, guru),
+                                    CustomText(text: '${anak.usia} tahun'),
+                                    CustomText(
+                                      text: anak.tanggalLahir,
+                                      fontSize: 12,
                                     ),
                                   ],
                                 ),
                                 onTap: () {
-                                  context.go('/detailGuru', extra: guru);
+                                  context.go('/penilaian', extra: anak);
                                 },
                               ),
                             );
@@ -228,36 +211,5 @@ class _GuruScreenState extends ConsumerState<GuruScreen> {
         error: (error, _) => Center(child: Text('Error: $error')),
       ),
     );
-  }
-
-  Future<void> _deleteGuru(
-    BuildContext context,
-    WidgetRef ref,
-    UserProfile guru,
-  ) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Hapus Guru'),
-        content: const Text('Apakah Anda yakin ingin menghapus guru ini?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Hapus'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      ref.read(guruNotifierProvider.notifier).deleteGuru(guru);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Data guru berhasil dihapus')),
-      );
-    }
   }
 }

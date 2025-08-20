@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:sapa/widgets/custom_text.dart';
 
+import '../../providers/aktivitas_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_profile_provider.dart';
 import '../../widgets/app_colors.dart';
@@ -28,7 +29,7 @@ class DashboardScreen extends ConsumerWidget {
     {
       'icon': 'assets/icons/hasil.svg',
       'label': 'Hasil',
-      'route': '/produk',
+      'route': '/hasil',
       'color': Color(0xFFB7DFF5),
       'sub': 'laporan penilaian',
     },
@@ -38,19 +39,6 @@ class DashboardScreen extends ConsumerWidget {
       'route': '/guru',
       'color': Color(0xFFD5C4B0),
       'sub': 'tambah akun guru',
-    },
-  ];
-
-  final List<Map<String, String>> aktivitasTerbaru = [
-    {
-      'nama': 'Ahmad Fauzi',
-      'aktivitas': 'Penilaian motorik kasar selesai',
-      'avatar': '',
-    },
-    {
-      'nama': 'Siti Aminah',
-      'aktivitas': 'Profil anak diperbarui',
-      'avatar': '',
     },
   ];
 
@@ -315,52 +303,93 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        padding: EdgeInsets.only(top: 12),
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: aktivitasTerbaru.length,
-                        itemBuilder: (context, index) {
-                          final item = aktivitasTerbaru[index];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: Card(
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: ListTile(
-                                leading:
-                                    item['avatar'] != null &&
-                                        item['avatar']!.isNotEmpty
-                                    ? CircleAvatar(
-                                        backgroundImage: NetworkImage(
-                                          item['avatar']!,
-                                        ),
-                                      )
-                                    : CircleAvatar(
+                      child: ref
+                          .watch(aktivitasProvider)
+                          .when(
+                            data: (aktivitasList) => ListView.builder(
+                              shrinkWrap: true,
+                              padding: const EdgeInsets.only(top: 12),
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: aktivitasList.length,
+                              itemBuilder: (context, index) {
+                                final item = aktivitasList[index];
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 4.0,
+                                  ),
+                                  child: Card(
+                                    elevation: 4,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: ListTile(
+                                      leading: CircleAvatar(
+                                        radius: 30,
                                         backgroundColor: Colors.grey[300],
-                                        child: Icon(
-                                          Icons.person,
-                                          color: Colors.grey[700],
+                                        child: ClipOval(
+                                          child: Image.network(
+                                            url(item.imageId),
+                                            fit: BoxFit.cover,
+                                            width: 100,
+                                            height: 100,
+                                            loadingBuilder: (context, child, loadingProgress) {
+                                              if (loadingProgress == null) {
+                                                return child;
+                                              }
+                                              return Center(
+                                                child: SizedBox(
+                                                  width: 24,
+                                                  height: 24,
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 2,
+                                                    value:
+                                                        loadingProgress
+                                                                .expectedTotalBytes !=
+                                                            null
+                                                        ? loadingProgress
+                                                                  .cumulativeBytesLoaded /
+                                                              loadingProgress
+                                                                  .expectedTotalBytes!
+                                                        : null,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    const Icon(
+                                                      Icons.error,
+                                                      color: Colors.red,
+                                                      size: 40,
+                                                    ),
+                                          ),
                                         ),
                                       ),
-                                title: CustomText(
-                                  text: item['nama']!,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                      title: CustomText(
+                                        text: item.namaAnak,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                      subtitle: CustomText(
+                                        text: item.deskripsi,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            loading: () => Padding(
+                              padding: EdgeInsets.only(top: 20.0),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColors.secondary,
                                 ),
-                                subtitle: CustomText(text: item['aktivitas']!),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                tileColor: Colors.white,
                               ),
                             ),
-                          );
-                        },
-                      ),
+                            error: (err, _) => Text("Error: $err"),
+                          ),
                     ),
+
                     const SizedBox(height: 100.0),
                   ],
                 ),

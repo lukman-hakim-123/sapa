@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/user_profile_model.dart';
 import '../../providers/guru_provider.dart';
-import '../../providers/user_profile_provider.dart';
 import '../../widgets/app_colors.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text.dart';
@@ -15,7 +14,6 @@ class DetailGuruScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userProfileState = ref.watch(userProfileNotifierProvider);
     final url = ref.read(guruNotifierProvider.notifier).getPublicImageUrl;
 
     return Scaffold(
@@ -110,7 +108,7 @@ class DetailGuruScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             CustomButton(
               text: 'Hapus Data',
-              onPressed: () => _deleteGuru(context, ref, guru.id),
+              onPressed: () => _deleteGuru(context, ref, guru),
               backgroundColor: Colors.red[700],
             ),
           ],
@@ -146,7 +144,7 @@ class DetailGuruScreen extends ConsumerWidget {
   Future<void> _deleteGuru(
     BuildContext context,
     WidgetRef ref,
-    String guruId,
+    UserProfile guru,
   ) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -167,7 +165,7 @@ class DetailGuruScreen extends ConsumerWidget {
     );
 
     if (confirm == true) {
-      await ref.read(guruNotifierProvider.notifier).deleteGuru(guru.id);
+      await ref.read(guruNotifierProvider.notifier).deleteGuru(guru);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Data guru berhasil dihapus')),
       );

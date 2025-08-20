@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../models/anak_model.dart';
 import '../../providers/anak_provider.dart';
 import '../../providers/user_profile_provider.dart';
 import '../../widgets/app_colors.dart';
@@ -204,11 +205,8 @@ class _AnakScreenState extends ConsumerState<AnakScreen> {
                                               Icons.delete,
                                               color: Colors.red,
                                             ),
-                                            onPressed: () => _deleteAnak(
-                                              context,
-                                              ref,
-                                              anak.id,
-                                            ),
+                                            onPressed: () =>
+                                                _deleteAnak(context, ref, anak),
                                           ),
                                         ],
                                       )
@@ -245,7 +243,7 @@ class _AnakScreenState extends ConsumerState<AnakScreen> {
   Future<void> _deleteAnak(
     BuildContext context,
     WidgetRef ref,
-    String anakId,
+    AnakModel anak,
   ) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -266,7 +264,8 @@ class _AnakScreenState extends ConsumerState<AnakScreen> {
     );
 
     if (confirm == true) {
-      ref.read(anakNotifierProvider.notifier).deleteAnak(anakId);
+      ref.read(anakNotifierProvider.notifier).deleteAnak(anak);
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Data anak berhasil dihapus')),
       );

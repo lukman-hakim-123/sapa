@@ -115,15 +115,23 @@ class GuruNotifier extends _$GuruNotifier {
     }
   }
 
-  Future<void> deleteGuru(String guruId) async {
+  Future<void> deleteGuru(UserProfile guru) async {
+    final previous = state.value ?? [];
     state = const AsyncValue.loading();
-    final result = await _guruService.deleteGuru(guruId);
-    if (result.isSuccess) {
-      state = AsyncValue.data(
-        (state.value ?? []).where((guru) => guru.id != guruId).toList(),
-      );
-    } else {
-      state = AsyncValue.error(result.errorMessage!, StackTrace.current);
+
+    try {
+      await _guruService.deleteProfileImage(guru.foto);
+      final result = await _guruService.deleteGuru(guru.id);
+
+      if (result.isSuccess) {
+        state = AsyncValue.data(
+          previous.where((g) => g.id != guru.id).toList(),
+        );
+      } else {
+        state = AsyncValue.error(result.errorMessage!, StackTrace.current);
+      }
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
     }
   }
 

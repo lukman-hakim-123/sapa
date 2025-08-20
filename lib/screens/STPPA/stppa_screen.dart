@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../providers/stppa_provider.dart';
+import '../../providers/user_profile_provider.dart';
 import '../../widgets/app_colors.dart';
 import '../../widgets/custom_text.dart';
 
@@ -11,6 +13,8 @@ class StppaScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // ignore: unused_local_variable
+    final userProfileState = ref.watch(userProfileNotifierProvider);
     final List<Map<String, dynamic>> kategoriItems = [
       {
         'title': 'Fisik Motorik',
@@ -114,12 +118,72 @@ class StppaScreen extends ConsumerWidget {
                       text: item['description'],
                       fontSize: 14.0,
                     ),
-                    onTap: item['onTap'],
+                    onTap: () {
+                      _showAgeDialog(context, ref, item['title']);
+                    },
                   ),
                 ),
               );
             }),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showAgeDialog(BuildContext context, WidgetRef ref, String kategori) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: CustomText(
+            text: "Pilih Usia",
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildAgeCard(context, ref, kategori, 5),
+              const SizedBox(height: 12),
+              _buildAgeCard(context, ref, kategori, 6),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAgeCard(
+    BuildContext context,
+    WidgetRef ref,
+    String kategori,
+    int usia,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).pop();
+        ref.read(selectedAgeKategoriProvider.notifier).state = {
+          'usia': usia,
+          'kategori': kategori,
+        };
+        context.go('/pilihAnak');
+      },
+      child: Card(
+        color: AppColors.secondary.withValues(alpha: 0.7),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+          child: Center(
+            child: CustomText(
+              text: "$usia Tahun",
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
         ),
       ),
     );

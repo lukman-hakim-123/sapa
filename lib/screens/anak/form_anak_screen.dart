@@ -419,6 +419,9 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
                             );
                             return;
                           }
+                          final tanggal = DateFormat(
+                            'dd-MM-yyyy',
+                          ).format(DateTime.now());
                           setState(() => _isSubmitting = true);
                           authState.when(
                             data: (user) {
@@ -432,6 +435,7 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
                                 guruId: user!.$id,
                                 jenisKelamin: gender!,
                                 imageId: '',
+                                tanggal: tanggal,
                               );
                               if (isEdit) {
                                 ref

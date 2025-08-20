@@ -15,6 +15,7 @@ class AnakModel with _$AnakModel {
     required String jenisKelamin,
     required String alamat,
     required String imageId,
+    required String tanggal,
   }) = _AnakModel;
 
   factory AnakModel.fromJson(Map<String, dynamic> json) =>

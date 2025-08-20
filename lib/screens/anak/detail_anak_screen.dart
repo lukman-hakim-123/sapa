@@ -138,7 +138,7 @@ class DetailAnakScreen extends ConsumerWidget {
                       const SizedBox(height: 16),
                       CustomButton(
                         text: 'Hapus Data',
-                        onPressed: () => _deleteAnak(context, ref, anak.id),
+                        onPressed: () => _deleteAnak(context, ref, anak),
                         backgroundColor: Colors.red[700],
                       ),
                     ],
@@ -185,7 +185,7 @@ class DetailAnakScreen extends ConsumerWidget {
   Future<void> _deleteAnak(
     BuildContext context,
     WidgetRef ref,
-    String anakId,
+    AnakModel anak,
   ) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -206,7 +206,7 @@ class DetailAnakScreen extends ConsumerWidget {
     );
 
     if (confirm == true) {
-      await ref.read(anakNotifierProvider.notifier).deleteAnak(anakId);
+      await ref.read(anakNotifierProvider.notifier).deleteAnak(anak);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Data anak berhasil dihapus')),
       );

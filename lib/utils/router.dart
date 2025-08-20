@@ -1,7 +1,12 @@
 import 'package:go_router/go_router.dart';
+import 'package:sapa/models/hasil_model.dart';
 import '../models/anak_model.dart';
 import '../models/user_profile_model.dart';
-import '../screens/STPPA/stppa_screen.dart';
+import '../screens/hasil/detail_hasil_screen.dart';
+import '../screens/hasil/pilih_hasil_anak_screen.dart';
+import '../screens/stppa/penilaian_screen.dart';
+import '../screens/stppa/pilih_anak_screen.dart';
+import '../screens/stppa/stppa_screen.dart';
 import '../screens/auth/splash_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
@@ -25,7 +30,12 @@ final router = GoRouter(
       builder: (context, state) => const RegisterScreen(),
     ),
     GoRoute(path: '/bottomNav', builder: (context, state) => const BottomNav()),
-    GoRoute(path: '/dashboard', builder: (context, state) => DashboardScreen()),
+    GoRoute(
+      path: '/dashboard',
+      builder: (context, state) => DashboardScreen(),
+      routes: [
+      
+    ]),
     GoRoute(
       path: '/profile',
       builder: (context, state) => const ProfileScreen(),
@@ -61,5 +71,27 @@ final router = GoRouter(
       },
     ),
     GoRoute(path: '/stppa', builder: (context, state) => const StppaScreen()),
+    GoRoute(
+      path: '/pilihAnak',
+      builder: (context, state) => const PilihAnakScreen(),
+    ),
+    GoRoute(
+      path: '/penilaian',
+      builder: (context, state) {
+        final anak = state.extra as AnakModel;
+        return PenilaianScreen(anak: anak);
+      },
+    ),
+    GoRoute(
+      path: '/hasil',
+      builder: (context, state) => const PilihHasilAnakScreen(),
+    ),
+    GoRoute(
+      path: '/detailHasil',
+      builder: (context, state) {
+        final hasil = state.extra as List<HasilModel>;
+        return DetailHasilScreen(hasilList: hasil);
+      },
+    ),
   ],
 );
