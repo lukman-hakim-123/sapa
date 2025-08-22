@@ -76,12 +76,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   Center(
                     child: Column(
                       children: [
-                        CustomText(
-                          text: 'SAPA',
-                          color: AppColors.primary,
-                          fontSize: 50,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        Image.asset('assets/icons/logo_sapa.png', height: 150),
                         const SizedBox(height: 12),
                         Align(
                           alignment: Alignment.centerLeft,

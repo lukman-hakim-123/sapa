@@ -38,7 +38,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (state.value != null) {
         context.go('/bottomNav');
       } else if (state.hasError) {
-        context.showSnackBar('Login failed: ${state.error}', Status.error);
+        final errorMessage = state.error is String
+            ? state.error as String
+            : state.error.toString();
+
+        context.showSnackBar('Login Gagal: $errorMessage', Status.error);
       }
     });
 
@@ -56,12 +60,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Center(
                     child: Column(
                       children: [
-                        CustomText(
-                          text: 'SAPA',
-                          color: AppColors.primary,
-                          fontSize: 50,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        Image.asset('assets/icons/logo_sapa.png', height: 150),
+
                         const SizedBox(height: 40),
                         Align(
                           alignment: Alignment.centerLeft,

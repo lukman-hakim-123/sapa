@@ -28,6 +28,32 @@ class HasilService {
     }
   }
 
+  Future<Result<void>> updateEmailForHasil(
+    String oldEmail,
+    String newEmail,
+  ) async {
+    try {
+      final documents = await _db.listDocuments(
+        databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
+        collectionId: dotenv.env['APPWRITE_HASIL_COLLECTION_ID']!,
+        queries: [Query.equal('email', oldEmail)],
+      );
+
+      for (final doc in documents.documents) {
+        await _db.updateDocument(
+          databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
+          collectionId: dotenv.env['APPWRITE_HASIL_COLLECTION_ID']!,
+          documentId: doc.$id,
+          data: {'email': newEmail},
+        );
+      }
+
+      return Result.success(null);
+    } catch (e) {
+      return Result.failed(e.toString());
+    }
+  }
+
   Future<Result<List<HasilModel>>> getAllHasil() async {
     try {
       final documents = await _db.listDocuments(

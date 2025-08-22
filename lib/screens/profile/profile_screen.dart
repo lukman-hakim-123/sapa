@@ -91,8 +91,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               if (profile == null) {
                 return const Center(child: Text("Can't fetch profile"));
               }
-              _namaController.text = profile.nama;
-              _emailController.text = profile.email;
+              if (_namaController.text.isEmpty) {
+                _namaController.text = profile.nama;
+              }
+              if (_emailController.text.isEmpty) {
+                _emailController.text = profile.email;
+              }
               return _buildProfileUI(context, user, profile, false, url);
             },
             loading: () => _buildProfileUI(context, user, null, true, url),
@@ -464,7 +468,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                         id: profile.id,
                                         nama: _namaController.text,
                                         email: _emailController.text,
-                                        foto: '',
+                                        foto: profile.foto,
                                         level_user: profile.level_user,
                                       ),
                                       photoFile: _pickedImage,
@@ -481,9 +485,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                           ? _passwordBaruController.text
                                           : null,
                                     );
-
                                 if (!context.mounted) return;
-
                                 if (result.isSuccess) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
@@ -505,7 +507,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 _passwordLamaController.clear();
                                 _passwordBaruController.clear();
                                 _ulangiPasswordBaruController.clear();
-                                _pickedImage = null;
+                                setState(() {
+                                  _pickedImage = null;
+                                });
                               }
                             }
                           },

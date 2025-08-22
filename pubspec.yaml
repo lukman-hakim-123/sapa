@@ -21,7 +21,7 @@ dependencies:
   appwrite: ^12.0.0
   flutter_dotenv: ^5.1.0
   google_fonts: ^6.2.1
-  flutter_native_splash: ^2.4.1
+  flutter_native_splash: ^2.4.6
   intl: ^0.20.2
   image_picker: ^1.1.2
   flutter_svg: ^2.2.0
@@ -29,6 +29,7 @@ dependencies:
   fl_chart: ^1.0.0
   pdf: ^3.11.3
   printing: ^5.14.2
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -44,6 +45,11 @@ dev_dependencies:
 
 dependency_overrides:
   flutter_web_auth_2: ^4.0.0
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/logo_sapa.png"
 
 flutter:
   uses-material-design: true

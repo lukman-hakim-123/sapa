@@ -25,6 +25,8 @@ class _AnakScreenState extends ConsumerState<AnakScreen> {
     final anakState = ref.watch(anakNotifierProvider);
     final userProfileState = ref.watch(userProfileNotifierProvider);
     return Scaffold(
+      backgroundColor: AppColors.background,
+
       appBar: AppBar(
         title: CustomText(
           text: 'Data Anak',

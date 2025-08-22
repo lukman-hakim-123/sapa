@@ -27,6 +27,7 @@ class _PilihAnakScreenState extends ConsumerState<PilihAnakScreen> {
     final selectedUsia = selected?['usia'];
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const CustomText(
           text: 'Pilih Anak',

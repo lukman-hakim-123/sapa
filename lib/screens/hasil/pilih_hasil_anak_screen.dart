@@ -113,7 +113,6 @@ class _PilihHasilAnakScreenState extends ConsumerState<PilihHasilAnakScreen> {
                     child: hasilState.when(
                       data: (hasilList) {
                         final grouped = <String, List<HasilModel>>{};
-
                         for (var hasil in hasilList) {
                           grouped.putIfAbsent(hasil.anakId, () => []);
                           grouped[hasil.anakId]!.add(hasil);

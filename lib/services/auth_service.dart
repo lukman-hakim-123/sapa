@@ -14,6 +14,15 @@ abstract class IAuthService {
   Future<Result<models.User>> getCurrentUser();
   Future<Result<models.Session>> getCurrentSession();
   Future<Result<void>> logout();
+  Future<Result<void>> updateEmail({
+    required String newEmail,
+    required String oldPassword,
+  });
+
+  Future<Result<void>> updatePassword({
+    required String oldPassword,
+    required String newPassword,
+  });
 }
 
 class AuthService implements IAuthService {
@@ -52,16 +61,17 @@ class AuthService implements IAuthService {
       final user = await _account.get();
       return Result.success(user);
     } on AppwriteException catch (e) {
-      String? message = e.message;
-      if (message?.contains('please check the email and password') ?? false) {
+      String message;
+
+      if (e.code == 401) {
         message = 'Email atau password salah';
-        return Result.failed(message);
-      }
-      if (message?.contains('Rate limit for the current endpoint') ?? false) {
+      } else if (e.code == 429) {
         message = 'Terlalu banyak percobaan. Mohon tunggu beberapa saat.';
-        return Result.failed(message);
+      } else {
+        message = e.message ?? 'Terjadi kesalahan, coba lagi nanti';
       }
-      return Result.failed(e.message.toString());
+
+      return Result.failed(message);
     }
   }
 
@@ -89,11 +99,39 @@ class AuthService implements IAuthService {
   @override
   Future<Result<models.Session>> getCurrentSession() async {
     try {
-      // Retrieve the current session
       final session = await _account.getSession(sessionId: 'current');
       return Result.success(session);
     } on AppwriteException catch (e) {
       return Result.failed(e.message.toString());
+    }
+  }
+
+  @override
+  Future<Result<void>> updateEmail({
+    required String newEmail,
+    required String oldPassword,
+  }) async {
+    try {
+      await _account.updateEmail(email: newEmail, password: oldPassword);
+      return const Result.success(null);
+    } on AppwriteException catch (e) {
+      return Result.failed(e.message ?? "Gagal update email");
+    }
+  }
+
+  @override
+  Future<Result<void>> updatePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await _account.updatePassword(
+        password: newPassword,
+        oldPassword: oldPassword,
+      );
+      return const Result.success(null);
+    } on AppwriteException catch (e) {
+      return Result.failed(e.message ?? "Gagal update password");
     }
   }
 }

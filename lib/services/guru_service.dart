@@ -19,7 +19,7 @@ class GuruService {
       final document = await _db.createDocument(
         databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
         collectionId: dotenv.env['APPWRITE_USERS_COLLECTION_ID']!,
-        documentId: 'unique()',
+        documentId: guru.id,
         data: jsonForCreate,
       );
 

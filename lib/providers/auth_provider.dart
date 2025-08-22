@@ -21,8 +21,15 @@ class Auth extends _$Auth {
     return checkSession();
   }
 
-  Future<void> login(String email, String password) async {
-    state = const AsyncValue.loading();
+  Future<void> login(
+    String email,
+    String password, {
+    bool fromRegister = false,
+  }) async {
+    if (!fromRegister) {
+      state = const AsyncValue.loading();
+    }
+
     final result = await _authService.login(email: email, password: password);
     if (result.isSuccess) {
       final user = result.resultValue;
@@ -57,7 +64,7 @@ class Auth extends _$Auth {
 
       await _userProfileNotifier.createUserProfile(userProfile);
 
-      await login(email, password);
+      await login(email, password, fromRegister: true);
     } else {
       state = AsyncValue.error(authResult.errorMessage!, StackTrace.current);
       resetState();
