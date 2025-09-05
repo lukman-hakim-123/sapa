@@ -86,6 +86,15 @@ class AnakNotifier extends _$AnakNotifier {
     }
   }
 
+  Future<AnakModel> getAnakById(String anakId) async {
+    final result = await _anakService.getAnakById(anakId);
+    if (result.isSuccess) {
+      return result.resultValue!;
+    } else {
+      throw Exception(result.errorMessage);
+    }
+  }
+
   Future<void> updateAnak(
     AnakModel updatedAnak,
     AnakModel oldAnak,

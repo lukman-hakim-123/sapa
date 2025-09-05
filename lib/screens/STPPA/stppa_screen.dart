@@ -7,6 +7,7 @@ import '../../providers/stppa_provider.dart';
 import '../../providers/user_profile_provider.dart';
 import '../../widgets/app_colors.dart';
 import '../../widgets/custom_text.dart';
+import '../../widgets/my_double_tap_exit.dart';
 
 class StppaScreen extends ConsumerWidget {
   const StppaScreen({super.key});
@@ -53,79 +54,84 @@ class StppaScreen extends ConsumerWidget {
         'onTap': () {},
       },
     ];
-    return Scaffold(
-      appBar: AppBar(
-        title: CustomText(
-          text: 'STPPA',
-          fontSize: 20.0,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
+    return MyDoubleTapExit(
+      child: Scaffold(
+        appBar: AppBar(
+          title: CustomText(
+            text: 'STPPA',
+            fontSize: 20.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+          backgroundColor: AppColors.primary,
+          centerTitle: true,
+          elevation: 0.0,
+          scrolledUnderElevation: 0.0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              context.go('/bottomNav');
+            },
+          ),
         ),
-        backgroundColor: AppColors.primary,
-        centerTitle: true,
-        elevation: 0.0,
-        scrolledUnderElevation: 0.0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            context.go('/bottomNav');
-          },
-        ),
-      ),
-      backgroundColor: AppColors.background,
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: CustomText(
-                text: 'Kategori Perkembangan',
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12.0),
-            ...kategoriItems.map((item) {
-              return Card(
-                color: Colors.white,
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                elevation: 4,
-                child: Container(
-                  height: 100.0,
-                  alignment: Alignment.center,
-                  child: ListTile(
-                    leading: Container(
-                      height: 50.0,
-                      width: 50.0,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
-                        color: item['color'],
-                      ),
-                      child: SvgPicture.asset(
-                        item['icon'],
-                        height: 40,
-                        fit: BoxFit.scaleDown,
-                      ),
-                    ),
-                    title: CustomText(
-                      text: item['title'],
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    subtitle: CustomText(
-                      text: item['description'],
-                      fontSize: 14.0,
-                    ),
-                    onTap: () {
-                      _showAgeDialog(context, ref, item['title']);
-                    },
-                  ),
+        backgroundColor: AppColors.background,
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: CustomText(
+                  text: 'Kategori Perkembangan',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-              );
-            }),
-          ],
+              ),
+              const SizedBox(height: 12.0),
+              ...kategoriItems.map((item) {
+                return Card(
+                  color: Colors.white,
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  elevation: 4,
+                  child: Container(
+                    height: 100.0,
+                    alignment: Alignment.center,
+                    child: ListTile(
+                      leading: Container(
+                        height: 50.0,
+                        width: 50.0,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                          color: item['color'],
+                        ),
+                        child: SvgPicture.asset(
+                          item['icon'],
+                          height: 40,
+                          fit: BoxFit.scaleDown,
+                        ),
+                      ),
+                      title: CustomText(
+                        text: item['title'],
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      subtitle: CustomText(
+                        text: item['description'],
+                        fontSize: 14.0,
+                      ),
+                      onTap: () {
+                        _showAgeDialog(context, ref, item['title']);
+                      },
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
         ),
       ),
     );

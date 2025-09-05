@@ -7,6 +7,7 @@ import '../../providers/user_profile_provider.dart';
 import '../../widgets/app_colors.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text.dart';
+import '../../widgets/my_double_tap_exit.dart';
 
 class DetailAnakScreen extends ConsumerWidget {
   final AnakModel anak;
@@ -18,141 +19,149 @@ class DetailAnakScreen extends ConsumerWidget {
     final userProfileState = ref.watch(userProfileNotifierProvider);
     final url = ref.read(anakNotifierProvider.notifier).getPublicImageUrl;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: CustomText(
-          text: 'Detail Anak',
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 20.0,
+    return MyDoubleTapExit(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          title: CustomText(
+            text: 'Detail Anak',
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20.0,
+          ),
+          centerTitle: true,
+          backgroundColor: AppColors.primary,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => context.go('/anak'),
+          ),
         ),
-        centerTitle: true,
-        backgroundColor: AppColors.primary,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.go('/anak'),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.grey[200],
-                      child: ClipOval(
-                        child: Image.network(
-                          url(anak.imageId),
-                          fit: BoxFit.cover,
-                          width: 100,
-                          height: 100,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) {
-                              return child;
-                            }
-                            return Center(
-                              child: SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  value:
-                                      loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes!
-                                      : null,
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.grey[200],
+                        child: ClipOval(
+                          child: Image.network(
+                            url(anak.imageId),
+                            fit: BoxFit.cover,
+                            width: 100,
+                            height: 100,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) {
+                                return child;
+                              }
+                              return Center(
+                                child: SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    value:
+                                        loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                  .cumulativeBytesLoaded /
+                                              loadingProgress
+                                                  .expectedTotalBytes!
+                                        : null,
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(
-                                Icons.error,
-                                color: Colors.red,
-                                size: 40,
-                              ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(
+                                  Icons.error,
+                                  color: Colors.red,
+                                  size: 40,
+                                ),
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CustomText(
+                            text: anak.nama,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          const SizedBox(height: 4),
+                          CustomText(text: anak.email),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    color: Colors.white,
+                    child: Column(
                       children: [
-                        CustomText(
-                          text: anak.nama,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                        const SizedBox(height: 8.0),
+                        _buildDetailCard('Tanggal Lahir', anak.tanggalLahir),
+                        _buildDetailCard(
+                          'Usia',
+                          '${anak.usia.toString()} Tahun',
                         ),
-                        const SizedBox(height: 4),
-                        CustomText(text: anak.email),
+                        _buildDetailCard('Jenis Kelamin', anak.jenisKelamin),
+                        _buildDetailCard('Alamat', anak.alamat),
+                        const SizedBox(height: 8.0),
                       ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
                   ),
-                  color: Colors.white,
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 8.0),
-                      _buildDetailCard('Tanggal Lahir', anak.tanggalLahir),
-                      _buildDetailCard('Usia', '${anak.usia.toString()} Tahun'),
-                      _buildDetailCard('Jenis Kelamin', anak.jenisKelamin),
-                      _buildDetailCard('Alamat', anak.alamat),
-                      const SizedBox(height: 8.0),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: userProfileState.when(
-        data: (profile) {
-          final int userLevel = profile!.level_user;
+        bottomNavigationBar: userProfileState.when(
+          data: (profile) {
+            final int userLevel = profile!.level_user;
 
-          return userLevel != 3
-              ? Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CustomButton(
-                        text: 'Edit Data',
-                        onPressed: () {
-                          GoRouter.of(context).push('/formAnak', extra: anak);
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      CustomButton(
-                        text: 'Hapus Data',
-                        onPressed: () => _deleteAnak(context, ref, anak),
-                        backgroundColor: Colors.red[700],
-                      ),
-                    ],
-                  ),
-                )
-              : const SizedBox.shrink();
-        },
-        loading: () => const SizedBox(
-          height: 60,
-          child: Center(child: CircularProgressIndicator()),
-        ),
-        error: (e, _) => Padding(
-          padding: const EdgeInsets.all(20),
-          child: Text('Error: $e'),
+            return userLevel != 3
+                ? Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CustomButton(
+                          text: 'Edit Data',
+                          onPressed: () {
+                            GoRouter.of(context).push('/formAnak', extra: anak);
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        CustomButton(
+                          text: 'Hapus Data',
+                          onPressed: () => _deleteAnak(context, ref, anak),
+                          backgroundColor: Colors.red[700],
+                        ),
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink();
+          },
+          loading: () => const SizedBox(
+            height: 60,
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (e, _) => Padding(
+            padding: const EdgeInsets.all(20),
+            child: Text('Error: $e'),
+          ),
         ),
       ),
     );

@@ -15,7 +15,6 @@ class KategoriCard extends ConsumerWidget {
   final String id;
   final String icon;
   final Color color;
-  final String subKategori;
   final bool isPrinting;
   final int levelUser;
   final HasilModel hasil;
@@ -26,19 +25,14 @@ class KategoriCard extends ConsumerWidget {
     required this.hasil,
     required this.icon,
     required this.color,
-    required this.subKategori,
     required this.levelUser,
     this.isPrinting = false,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final expanded = ref.watch(expandedProvider(id));
-    final List<Map<String, dynamic>> parsedSubKategori =
-        (jsonDecode(subKategori) as List)
-            .map((e) => Map<String, dynamic>.from(e))
-            .toList();
-
+    final Map<String, dynamic> parsedJawaban =
+        jsonDecode(hasil.jawaban) as Map<String, dynamic>;
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -130,7 +124,7 @@ class KategoriCard extends ConsumerWidget {
             Container(
               height: 150,
               padding: const EdgeInsets.all(8),
-              child: SubKategoriPieChart(subKategoriData: parsedSubKategori),
+              child: JawabanPieChart(jawaban: parsedJawaban),
             ),
             const SizedBox(height: 12),
             Container(
@@ -144,131 +138,31 @@ class KategoriCard extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (!expanded) ...[
-                    buildShortDescription(hasil),
-                    InkWell(
-                      onTap: () =>
-                          ref.read(expandedProvider(id).notifier).state = true,
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: CustomText(
-                          text: "Lihat selengkapnya",
-                          fontSize: 14,
-                          color: Colors.blue,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                  if (expanded) ...[
-                    buildFullDescription(hasil),
-                    InkWell(
-                      onTap: () =>
-                          ref.read(expandedProvider(id).notifier).state = false,
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: CustomText(
-                          text: "Tutup",
-                          fontSize: 14,
-                          color: Colors.blue,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
+                  CustomText(text: 'Kesimpulan:', fontWeight: FontWeight.bold),
+                  CustomText(text: hasil.kesimpulan),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF1E6),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFFFCBA4), width: 1.2),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText(text: 'Rekomendasi:', fontWeight: FontWeight.bold),
+                  CustomText(text: hasil.rekomendasi),
                 ],
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget buildShortDescription(HasilModel h) {
-    final mampu = h.contohMampu.trim();
-    final bantuan = h.contohMampuBantuan.trim();
-    final belum = h.contohBelumMampu.trim();
-
-    if (mampu.isEmpty && bantuan.isEmpty && belum.isEmpty) {
-      return const Text("Belum ada catatan untuk kategori ini.");
-    }
-
-    final spans = <TextSpan>[];
-
-    if (mampu.isNotEmpty) {
-      spans.add(const TextSpan(text: "Anak mampu "));
-      spans.add(
-        TextSpan(
-          text: mampu,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-      );
-    }
-
-    if (bantuan.isNotEmpty) {
-      if (spans.isNotEmpty) spans.add(const TextSpan(text: ". "));
-      spans.add(const TextSpan(text: "Dengan bantuan, anak sudah bisa "));
-      spans.add(
-        TextSpan(
-          text: bantuan,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-      );
-    }
-
-    if (belum.isNotEmpty) {
-      if (spans.isNotEmpty) spans.add(const TextSpan(text: ". "));
-      spans.add(const TextSpan(text: "Namun, anak masih kesulitan dalam "));
-      spans.add(
-        TextSpan(
-          text: belum,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-      );
-    }
-
-    return RichText(
-      textAlign: TextAlign.justify,
-      text: TextSpan(
-        style: const TextStyle(fontSize: 14, height: 1.3, color: Colors.black),
-        children: spans,
-      ),
-    );
-  }
-
-  Widget buildFullDescription(HasilModel h) {
-    final mampu = h.contohMampu.trim().isNotEmpty
-        ? h.contohMampu.split(",").map((e) => e.trim()).toList()
-        : [];
-    final bantuan = h.contohMampuBantuan.trim().isNotEmpty
-        ? h.contohMampuBantuan.split(",").map((e) => e.trim()).toList()
-        : [];
-    final belum = h.contohBelumMampu.trim().isNotEmpty
-        ? h.contohBelumMampu.split(",").map((e) => e.trim()).toList()
-        : [];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (mampu.isNotEmpty) ...[
-          const CustomText(text: "Mampu:", fontWeight: FontWeight.bold),
-          ...mampu.map((e) => CustomText(text: "• $e")),
-          const SizedBox(height: 8),
-        ],
-        if (bantuan.isNotEmpty) ...[
-          const CustomText(
-            text: "Dengan Bantuan:",
-            fontWeight: FontWeight.bold,
-          ),
-          ...bantuan.map((e) => CustomText(text: "• $e")),
-          const SizedBox(height: 8),
-        ],
-        if (belum.isNotEmpty) ...[
-          const CustomText(text: "Belum Mampu:", fontWeight: FontWeight.bold),
-          ...belum.map((e) => CustomText(text: "• $e")),
-        ],
-      ],
     );
   }
 }

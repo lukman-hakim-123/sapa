@@ -15,6 +15,7 @@ import '../../widgets/app_colors.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text.dart';
 import '../../widgets/custom_text_field.dart';
+import '../../widgets/my_double_tap_exit.dart';
 
 class FormAnakScreen extends ConsumerStatefulWidget {
   final AnakModel? anak;
@@ -148,323 +149,325 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
       );
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        title: CustomText(
-          text: isEdit ? 'Edit Anak' : 'Tambah Anak',
-          color: Colors.white,
-          fontSize: 20.0,
-          fontWeight: FontWeight.bold,
+    return MyDoubleTapExit(
+      child: Scaffold(
+        appBar: AppBar(
+          title: CustomText(
+            text: isEdit ? 'Edit Anak' : 'Tambah Anak',
+            color: Colors.white,
+            fontSize: 20.0,
+            fontWeight: FontWeight.bold,
+          ),
+          backgroundColor: AppColors.primary,
+          scrolledUnderElevation: 0.0,
+          elevation: 0.0,
+          automaticallyImplyLeading: false,
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => context.go('/anak'),
+          ),
         ),
-        backgroundColor: AppColors.primary,
-        scrolledUnderElevation: 0.0,
-        elevation: 0.0,
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.go('/anak'),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              Column(
-                children: [
-                  CircleAvatar(
-                    radius: 53,
-                    backgroundColor: Colors.white,
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.grey[300],
-                      child: _pickedImage != null
-                          ? ClipOval(
-                              child: Image.file(
-                                _pickedImage!,
-                                fit: BoxFit.cover,
-                                width: 100,
-                                height: 100,
-                              ),
-                            )
-                          : isEdit && widget.anak!.imageId.isNotEmpty
-                          ? ClipOval(
-                              child: Image.network(
-                                url(widget.anak!.imageId),
-                                fit: BoxFit.cover,
-                                width: 100,
-                                height: 100,
-                              ),
-                            )
-                          : const Icon(
-                              Icons.person,
-                              size: 50,
-                              color: Colors.white,
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                    ),
-                    onPressed: _pickImage,
-                    child: CustomText(
-                      text: isEdit ? 'Ganti Foto' : 'Tambah Foto',
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Icon(Icons.person, size: 25.0),
-                  CustomText(text: 'Nama Anak', fontWeight: FontWeight.bold),
-                ],
-              ),
-              const SizedBox(height: 4.0),
-              CustomTextFormField(
-                controller: _namaController,
-                hintText: 'Nama Anak',
-                validator: (value) =>
-                    ValidationHelper.validateNotEmpty(value, 'Nama Anak'),
-              ),
-              const SizedBox(height: 10),
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                Column(
                   children: [
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.date_range, size: 25.0),
-                              CustomText(
-                                text: 'Tanggal Lahir',
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4.0),
-                          CustomTextFormField(
-                            controller: _tanggalLahirController,
-                            hintText: 'Tanggal Lahir',
-                            readOnly: true,
-                            suffixIcon: const Icon(
-                              Icons.date_range,
-                              color: Colors.grey,
-                            ),
-                            onTap: _pickDate,
-                            validator: (value) =>
-                                ValidationHelper.validateNotEmpty(
-                                  value,
-                                  'Tanggal Lahir',
+                    CircleAvatar(
+                      radius: 53,
+                      backgroundColor: Colors.white,
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.grey[300],
+                        child: _pickedImage != null
+                            ? ClipOval(
+                                child: Image.file(
+                                  _pickedImage!,
+                                  fit: BoxFit.cover,
+                                  width: 100,
+                                  height: 100,
                                 ),
-                          ),
-                        ],
+                              )
+                            : isEdit && widget.anak!.imageId.isNotEmpty
+                            ? ClipOval(
+                                child: Image.network(
+                                  url(widget.anak!.imageId),
+                                  fit: BoxFit.cover,
+                                  width: 100,
+                                  height: 100,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.person,
+                                size: 50,
+                                color: Colors.white,
+                              ),
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.cake, size: 25.0),
-                              CustomText(
-                                text: 'Usia',
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 3.0),
-                          CustomTextFormField(
-                            controller: _usiaController,
-                            keyboardType: TextInputType.number,
-                            readOnly: !isEdit,
-                            suffix: CustomText(
-                              text: 'Tahun',
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 24.0,
-                              vertical: 16.0,
-                            ),
-                          ),
-                        ],
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                      ),
+                      onPressed: _pickImage,
+                      child: CustomText(
+                        text: isEdit ? 'Ganti Foto' : 'Tambah Foto',
                       ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 10.0),
-              Row(
-                children: [
-                  SvgPicture.asset('assets/icons/gender.svg'),
-                  CustomText(
-                    text: 'Jenis Kelamin',
-                    fontWeight: FontWeight.bold,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4.0),
-              Row(
-                children: [
-                  Expanded(
-                    child: RadioListTile<String>(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      visualDensity: const VisualDensity(horizontal: -4),
-                      title: CustomText(
-                        text: "Laki-laki",
-                        fontSize: 16.0,
-                        overflow: TextOverflow.ellipsis,
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Icon(Icons.person, size: 25.0),
+                    CustomText(text: 'Nama Anak', fontWeight: FontWeight.bold),
+                  ],
+                ),
+                const SizedBox(height: 4.0),
+                CustomTextFormField(
+                  controller: _namaController,
+                  hintText: 'Nama Anak',
+                  validator: (value) =>
+                      ValidationHelper.validateNotEmpty(value, 'Nama Anak'),
+                ),
+                const SizedBox(height: 10),
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.date_range, size: 25.0),
+                                CustomText(
+                                  text: 'Tanggal Lahir',
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4.0),
+                            CustomTextFormField(
+                              controller: _tanggalLahirController,
+                              hintText: 'Tanggal Lahir',
+                              readOnly: true,
+                              suffixIcon: const Icon(
+                                Icons.date_range,
+                                color: Colors.grey,
+                              ),
+                              onTap: _pickDate,
+                              validator: (value) =>
+                                  ValidationHelper.validateNotEmpty(
+                                    value,
+                                    'Tanggal Lahir',
+                                  ),
+                            ),
+                          ],
+                        ),
                       ),
-                      value: "Laki-laki",
-                      groupValue: gender,
-                      onChanged: (value) {
-                        setState(() => gender = value);
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: RadioListTile<String>(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      visualDensity: const VisualDensity(horizontal: -4),
-                      title: CustomText(
-                        text: "Perempuan",
-                        fontSize: 16.0,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      value: "Perempuan",
-                      groupValue: gender,
-                      onChanged: (value) {
-                        setState(() => gender = value);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Icon(Icons.location_pin, size: 25.0),
-                  CustomText(text: 'Alamat', fontWeight: FontWeight.bold),
-                ],
-              ),
-              const SizedBox(height: 4.0),
-              CustomTextFormField(
-                controller: _alamatController,
-                hintText: 'Alamat',
-                maxLines: 2,
-                validator: (value) =>
-                    ValidationHelper.validateNotEmpty(value, 'Alamat'),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Icon(Icons.email, size: 25.0),
-                  CustomText(text: 'Email', fontWeight: FontWeight.bold),
-                ],
-              ),
-              const SizedBox(height: 4.0),
-              CustomTextFormField(
-                controller: _emailController,
-                hintText: 'Email',
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) => ValidationHelper.validateEmail(value),
-              ),
-              const SizedBox(height: 24),
-              CustomButton(
-                onPressed: anakState.isLoading || _isSubmitting
-                    ? null
-                    : () {
-                        if (_formKey.currentState!.validate()) {
-                          if (_tanggalLahir == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Tanggal lahir belum dipilih'),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        flex: 2,
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.cake, size: 25.0),
+                                CustomText(
+                                  text: 'Usia',
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3.0),
+                            CustomTextFormField(
+                              controller: _usiaController,
+                              keyboardType: TextInputType.number,
+                              readOnly: !isEdit,
+                              suffix: CustomText(
+                                text: 'Tahun',
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w500,
                               ),
-                            );
-                            return;
-                          }
-                          if (gender == null || gender == '') {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Jenis kelamin belum dipilih'),
-                              ),
-                            );
-                            return;
-                          }
-                          if (!isEdit && _pickedImage == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Foto belum dipilih'),
-                              ),
-                            );
-                            return;
-                          }
-                          final tanggal = DateFormat(
-                            'dd-MM-yyyy',
-                          ).format(DateTime.now());
-                          setState(() => _isSubmitting = true);
-                          authState.when(
-                            data: (user) {
-                              final updatedModel = AnakModel(
-                                id: isEdit ? widget.anak!.id : '',
-                                nama: _namaController.text,
-                                alamat: _alamatController.text,
-                                email: _emailController.text,
-                                usia: int.parse(_usiaController.text),
-                                tanggalLahir: _tanggalLahir!,
-                                guruId: user!.$id,
-                                jenisKelamin: gender!,
-                                imageId: '',
-                                tanggal: tanggal,
-                              );
-                              if (isEdit) {
-                                ref
-                                    .read(anakNotifierProvider.notifier)
-                                    .updateAnak(
-                                      updatedModel,
-                                      widget.anak!,
-                                      _pickedImage,
-                                    );
-                              } else {
-                                ref
-                                    .read(anakNotifierProvider.notifier)
-                                    .createAnak(updatedModel, _pickedImage!);
-                              }
-                            },
-                            loading: () => Center(
-                              child: CircularProgressIndicator(
-                                color: AppColors.secondary,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 24.0,
+                                vertical: 16.0,
                               ),
                             ),
-                            error: (error, _) =>
-                                Center(child: Text('Error: $error')),
-                          );
-                        }
-                      },
-                isLoading: _isSubmitting,
-                text: isEdit ? 'Edit Data Anak' : 'Tambah Anak',
-              ),
-            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10.0),
+                Row(
+                  children: [
+                    SvgPicture.asset('assets/icons/gender.svg'),
+                    CustomText(
+                      text: 'Jenis Kelamin',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4.0),
+                Row(
+                  children: [
+                    Expanded(
+                      child: RadioListTile<String>(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        visualDensity: const VisualDensity(horizontal: -4),
+                        title: CustomText(
+                          text: "Laki-laki",
+                          fontSize: 16.0,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        value: "Laki-laki",
+                        groupValue: gender,
+                        onChanged: (value) {
+                          setState(() => gender = value);
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: RadioListTile<String>(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        visualDensity: const VisualDensity(horizontal: -4),
+                        title: CustomText(
+                          text: "Perempuan",
+                          fontSize: 16.0,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        value: "Perempuan",
+                        groupValue: gender,
+                        onChanged: (value) {
+                          setState(() => gender = value);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Icon(Icons.location_pin, size: 25.0),
+                    CustomText(text: 'Alamat', fontWeight: FontWeight.bold),
+                  ],
+                ),
+                const SizedBox(height: 4.0),
+                CustomTextFormField(
+                  controller: _alamatController,
+                  hintText: 'Alamat',
+                  maxLines: 2,
+                  validator: (value) =>
+                      ValidationHelper.validateNotEmpty(value, 'Alamat'),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Icon(Icons.email, size: 25.0),
+                    CustomText(text: 'Email', fontWeight: FontWeight.bold),
+                  ],
+                ),
+                const SizedBox(height: 4.0),
+                CustomTextFormField(
+                  controller: _emailController,
+                  hintText: 'Email',
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) => ValidationHelper.validateEmail(value),
+                ),
+                const SizedBox(height: 24),
+                CustomButton(
+                  onPressed: anakState.isLoading || _isSubmitting
+                      ? null
+                      : () {
+                          if (_formKey.currentState!.validate()) {
+                            if (_tanggalLahir == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Tanggal lahir belum dipilih'),
+                                ),
+                              );
+                              return;
+                            }
+                            if (gender == null || gender == '') {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Jenis kelamin belum dipilih'),
+                                ),
+                              );
+                              return;
+                            }
+                            if (!isEdit && _pickedImage == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Foto belum dipilih'),
+                                ),
+                              );
+                              return;
+                            }
+                            final tanggal = DateFormat(
+                              'dd-MM-yyyy',
+                            ).format(DateTime.now());
+                            setState(() => _isSubmitting = true);
+                            authState.when(
+                              data: (user) {
+                                final updatedModel = AnakModel(
+                                  id: isEdit ? widget.anak!.id : '',
+                                  nama: _namaController.text,
+                                  alamat: _alamatController.text,
+                                  email: _emailController.text,
+                                  usia: int.parse(_usiaController.text),
+                                  tanggalLahir: _tanggalLahir!,
+                                  guruId: user!.$id,
+                                  jenisKelamin: gender!,
+                                  imageId: '',
+                                  tanggal: tanggal,
+                                );
+                                if (isEdit) {
+                                  ref
+                                      .read(anakNotifierProvider.notifier)
+                                      .updateAnak(
+                                        updatedModel,
+                                        widget.anak!,
+                                        _pickedImage,
+                                      );
+                                } else {
+                                  ref
+                                      .read(anakNotifierProvider.notifier)
+                                      .createAnak(updatedModel, _pickedImage!);
+                                }
+                              },
+                              loading: () => Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColors.secondary,
+                                ),
+                              ),
+                              error: (error, _) =>
+                                  Center(child: Text('Error: $error')),
+                            );
+                          }
+                        },
+                  isLoading: _isSubmitting,
+                  text: isEdit ? 'Edit Data Anak' : 'Tambah Anak',
+                ),
+              ],
+            ),
           ),
         ),
       ),

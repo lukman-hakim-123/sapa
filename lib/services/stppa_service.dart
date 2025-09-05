@@ -20,6 +20,7 @@ class StppaService {
           Query.equal('kategori', kategori),
           Query.equal('usia', usia),
           Query.orderAsc("nomor"),
+          Query.limit(100),
         ],
       );
       final stppaList = documents.documents.map((doc) {

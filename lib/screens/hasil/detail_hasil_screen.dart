@@ -1,16 +1,24 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:sapa/models/hasil_model.dart';
+import 'package:sapa/models/stppa_model.dart';
 import 'package:sapa/screens/hasil/widget/kategori_card.dart';
+import '../../models/anak_model.dart';
+import '../../providers/anak_provider.dart';
 import '../../providers/hasil_provider.dart';
+import '../../providers/stppa_provider.dart';
 import '../../providers/user_profile_provider.dart';
 import '../../widgets/app_colors.dart';
 import '../../widgets/custom_text.dart';
-import 'dart:ui' as ui;
-import 'package:flutter/rendering.dart';
+
+import '../../widgets/my_double_tap_exit.dart';
 
 class DetailHasilScreen extends ConsumerStatefulWidget {
   final List<HasilModel> hasilList;
@@ -30,37 +38,222 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
     return DateTime(1970, 1, 1);
   }
 
-  Future<void> _captureAndPrint() async {
-    try {
-      ref.read(isPrintingProvider.notifier).state = true;
-      await Future.delayed(const Duration(milliseconds: 100));
+  Future<void> generateFullReport({
+    required List<HasilModel> hasilList,
+    required AnakModel anak,
+    required Map<String, List<StppaModel>> kategoriSoalMap,
+  }) async {
+    final doc = pw.Document();
+    final tnrData = await rootBundle.load("assets/fonts/times.ttf");
+    final tnrFont = pw.Font.ttf(tnrData);
+    final tnrBoldData = await rootBundle.load(
+      "assets/fonts/Times New Roman Bold.ttf",
+    );
+    final tnrBoldFont = pw.Font.ttf(tnrBoldData);
 
-      final doc = pw.Document();
+    for (final hasil in hasilList) {
+      final soalList = kategoriSoalMap[hasil.kategori] ?? [];
+      final jawaban = (jsonDecode(hasil.jawaban) as Map<String, dynamic>).map(
+        (k, v) => MapEntry(int.parse(k), v as int),
+      );
 
-      for (final key in _cardKeys) {
-        final boundary =
-            key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-        if (boundary == null) continue;
+      doc.addPage(
+        pw.MultiPage(
+          build: (context) => [
+            pw.Center(
+              child: pw.Text(
+                'INSTRUMEN ASPEK PERKEMBANGAN ${hasil.kategori.toUpperCase()} UNTUK ANAK USIA ${(hasil.usia - 1).toString()}-${hasil.usia.toString()}',
+                textAlign: pw.TextAlign.center,
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  font: tnrBoldFont,
+                ),
+              ),
+            ),
 
-        final image = await boundary.toImage(pixelRatio: 2.0);
-        final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-        final pngBytes = byteData!.buffer.asUint8List();
-        final img = pw.MemoryImage(pngBytes);
+            pw.SizedBox(height: 20),
+            pw.Text(
+              'IDENTITAS SISWA',
+              textAlign: pw.TextAlign.left,
+              style: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                font: tnrBoldFont,
+              ),
+            ),
+            pw.SizedBox(height: 5),
 
-        doc.addPage(
-          pw.Page(
-            build: (_) =>
-                pw.Center(child: pw.Image(img, fit: pw.BoxFit.contain)),
-          ),
-        );
-      }
+            pw.Table(
+              columnWidths: {
+                0: pw.FixedColumnWidth(150),
+                1: pw.FlexColumnWidth(),
+              },
+              children: [
+                pw.TableRow(
+                  children: [
+                    pw.Text('Nama Lengkap', style: pw.TextStyle(font: tnrFont)),
+                    pw.Text(
+                      ': ${anak.nama}',
+                      style: pw.TextStyle(font: tnrFont),
+                    ),
+                  ],
+                ),
+                pw.TableRow(
+                  children: [
+                    pw.Text(
+                      'Tempat, Tgl Lahir',
+                      style: pw.TextStyle(font: tnrFont),
+                    ),
+                    pw.Text(
+                      ': ${anak.tanggalLahir}',
+                      style: pw.TextStyle(font: tnrFont),
+                    ),
+                  ],
+                ),
+                pw.TableRow(
+                  children: [
+                    pw.Text('Usia', style: pw.TextStyle(font: tnrFont)),
+                    pw.Text(
+                      ': ${anak.usia}',
+                      style: pw.TextStyle(font: tnrFont),
+                    ),
+                  ],
+                ),
+                pw.TableRow(
+                  children: [
+                    pw.Text('Alamat', style: pw.TextStyle(font: tnrFont)),
+                    pw.Text(
+                      ': ${anak.alamat}',
+                      style: pw.TextStyle(font: tnrFont),
+                    ),
+                  ],
+                ),
+              ],
+            ),
 
-      await Printing.layoutPdf(onLayout: (_) async => doc.save());
-    } catch (e, st) {
-      debugPrint("Gagal print: $e\n$st");
-    } finally {
-      ref.read(isPrintingProvider.notifier).state = false;
+            pw.SizedBox(height: 12),
+            pw.Text(
+              'INSTRUMEN CEKLIS (V)',
+              style: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                font: tnrBoldFont,
+              ),
+            ),
+            pw.SizedBox(height: 10),
+
+            pw.TableHelper.fromTextArray(
+              headers: [
+                'No',
+                'Indikator',
+                'Perilaku yang Diamati',
+                'Mampu',
+                'Mampu dengan bantuan',
+                'Belum Mampu',
+                'Ket',
+              ],
+              headerCellDecoration: pw.BoxDecoration(color: PdfColors.grey300),
+              headerAlignments: {
+                0: pw.Alignment.center,
+                1: pw.Alignment.center,
+                2: pw.Alignment.center,
+                3: pw.Alignment.center,
+                4: pw.Alignment.center,
+                5: pw.Alignment.center,
+                6: pw.Alignment.center,
+              },
+              data: soalList.map((soal) {
+                final val = jawaban[soal.nomor];
+                return [
+                  soal.nomor.toString(),
+                  soal.indikator,
+                  soal.pernyataan,
+                  val == 3 ? 'V' : '',
+                  val == 2 ? 'V' : '',
+                  val == 1 ? 'V' : '',
+                  '',
+                ];
+              }).toList(),
+              columnWidths: {
+                0: const pw.FixedColumnWidth(30), // kolom No
+                1: const pw.FixedColumnWidth(100), // kolom Indikator
+                2: const pw.FlexColumnWidth(), // kolom Perilaku (biar fleksibel)
+                3: const pw.FixedColumnWidth(55), // kolom Mampu
+                4: const pw.FixedColumnWidth(55), // kolom Bantuan
+                5: const pw.FixedColumnWidth(55), // kolom Tidak Mampu
+                6: const pw.FixedColumnWidth(40), // kolom Ket
+              },
+              cellAlignments: {
+                0: pw.Alignment.center,
+                1: pw.Alignment.centerLeft,
+                2: pw.Alignment.centerLeft,
+                3: pw.Alignment.center,
+                4: pw.Alignment.center,
+                5: pw.Alignment.center,
+                6: pw.Alignment.center,
+              },
+              headerStyle: pw.TextStyle(
+                font: tnrFont,
+                fontWeight: pw.FontWeight.bold,
+              ),
+              cellStyle: pw.TextStyle(font: tnrFont),
+            ),
+            pw.SizedBox(height: 20),
+            pw.Table(
+              columnWidths: {
+                0: const pw.FixedColumnWidth(100),
+                1: const pw.FixedColumnWidth(10),
+                2: const pw.FlexColumnWidth(),
+              },
+              children: [
+                pw.TableRow(
+                  children: [
+                    pw.Text(
+                      'Kesimpulan',
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        font: tnrBoldFont,
+                      ),
+                    ),
+                    pw.Text(':'),
+                    pw.Text(
+                      hasil.kesimpulan,
+                      style: pw.TextStyle(font: tnrFont),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            pw.SizedBox(height: 10),
+            pw.Table(
+              columnWidths: {
+                0: const pw.FixedColumnWidth(100),
+                1: const pw.FixedColumnWidth(10),
+                2: const pw.FlexColumnWidth(),
+              },
+              children: [
+                pw.TableRow(
+                  children: [
+                    pw.Text(
+                      'Rekomendasi',
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        font: tnrBoldFont,
+                      ),
+                    ),
+                    pw.Text(':'),
+                    pw.Text(
+                      hasil.rekomendasi,
+                      style: pw.TextStyle(font: tnrFont),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
     }
+
+    await Printing.layoutPdf(onLayout: (_) async => doc.save());
   }
 
   final List<GlobalKey> _cardKeys = [];
@@ -71,7 +264,6 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
     final hasilState = ref.watch(hasilNotifierProvider);
     final userProfile = ref.watch(userProfileNotifierProvider);
     final levelUser = userProfile.value?.level_user ?? 3;
-    final isPrinting = ref.watch(isPrintingProvider);
     if (widget.hasilList.isEmpty) {
       return Scaffold(
         backgroundColor: AppColors.background,
@@ -84,12 +276,10 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
           ),
           backgroundColor: AppColors.primary,
           centerTitle: true,
-          leading: isPrinting
-              ? null
-              : IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => context.go('/hasil'),
-                ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => context.go('/hasil'),
+          ),
         ),
         body: const Center(child: CustomText(text: 'Belum ada data')),
       );
@@ -149,197 +339,108 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
       'Nilai Agama dan Moral': Color(0xFFE596E6),
     };
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const CustomText(
-          text: 'Detail Hasil',
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
+    return MyDoubleTapExit(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          title: const CustomText(
+            text: 'Detail Hasil',
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+          backgroundColor: AppColors.primary,
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => context.go('/hasil'),
+          ),
         ),
-        backgroundColor: AppColors.primary,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.go('/hasil'),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _LegendItem(color: Colors.green, text: "Mampu"),
-                          _LegendItem(
-                            color: Colors.orange,
-                            text: "Mampu dengan bantuan",
-                          ),
-                          _LegendItem(color: Colors.red, text: "Belum mampu"),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          CustomText(
-                            text: namaAnak,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          const SizedBox(height: 4.0),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.black12),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _LegendItem(color: Colors.green, text: "Mampu"),
+                            _LegendItem(
+                              color: Colors.orange,
+                              text: "Mampu dengan bantuan",
                             ),
-                            child: DropdownButton<int>(
-                              value: selectedPeriod,
-                              underline: const SizedBox(),
-                              onChanged: (val) {
-                                if (val != null) {
-                                  setState(() => selectedPeriod = val);
-                                }
-                              },
-                              items: List.generate(
-                                maxPeriods,
-                                (i) => DropdownMenuItem(
-                                  value: i + 1,
-                                  child: Text('Periode ${i + 1}'),
+                            _LegendItem(color: Colors.red, text: "Belum mampu"),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            CustomText(
+                              text: namaAnak,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            const SizedBox(height: 4.0),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.black12),
+                              ),
+                              child: DropdownButton<int>(
+                                value: selectedPeriod,
+                                underline: const SizedBox(),
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    setState(() => selectedPeriod = val);
+                                  }
+                                },
+                                items: List.generate(
+                                  maxPeriods,
+                                  (i) => DropdownMenuItem(
+                                    value: i + 1,
+                                    child: Text('Periode ${i + 1}'),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-                if (entriesThisPeriod.isEmpty)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 32),
-                      child: CustomText(
-                        text: 'Tidak ada kategori pada periode ini',
-                      ),
+                          ],
+                        ),
+                      ],
                     ),
-                  )
-                else
-                  ...entriesThisPeriod.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final h = entry.value;
-
-                    if (_cardKeys.length <= index) {
-                      _cardKeys.add(GlobalKey());
-                    }
-                    final icon =
-                        kategoriIcons[h.kategori] ?? 'assets/icons/fm.svg';
-                    final color = kategoriColors[h.kategori] ?? Colors.grey;
-                    return RepaintBoundary(
-                      key: _cardKeys[index],
-                      child: Column(
+                  ),
+                  const SizedBox(height: 20),
+                  if (entriesThisPeriod.isEmpty)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 32),
+                        child: CustomText(
+                          text: 'Tidak ada kategori pada periode ini',
+                        ),
+                      ),
+                    )
+                  else
+                    ...entriesThisPeriod.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final h = entry.value;
+                      if (_cardKeys.length <= index) {
+                        _cardKeys.add(GlobalKey());
+                      }
+                      final icon =
+                          kategoriIcons[h.kategori] ?? 'assets/icons/fm.svg';
+                      final color = kategoriColors[h.kategori] ?? Colors.grey;
+                      return Column(
                         children: [
-                          Visibility(
-                            visible: isPrinting,
-                            child: Container(
-                              height: 60,
-                              width: double.infinity,
-                              color: AppColors.primary,
-                              alignment: Alignment.center,
-                              child: CustomText(
-                                text: 'Detail Hasil',
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
-                            ),
-                          ),
-                          Visibility(
-                            visible: isPrinting,
-                            child: Padding(
-                              padding: const EdgeInsets.all(20.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      _LegendItem(
-                                        color: Colors.green,
-                                        text: "Mampu",
-                                      ),
-                                      _LegendItem(
-                                        color: Colors.orange,
-                                        text: "Mampu dengan bantuan",
-                                      ),
-                                      _LegendItem(
-                                        color: Colors.red,
-                                        text: "Belum mampu",
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      CustomText(
-                                        text: namaAnak,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      const SizedBox(height: 4.0),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.black12,
-                                          ),
-                                        ),
-                                        child: DropdownButton<int>(
-                                          value: selectedPeriod,
-                                          underline: const SizedBox(),
-                                          onChanged: (val) {
-                                            if (val != null) {
-                                              setState(
-                                                () => selectedPeriod = val,
-                                              );
-                                            }
-                                          },
-                                          items: List.generate(
-                                            maxPeriods,
-                                            (i) => DropdownMenuItem(
-                                              value: i + 1,
-                                              child: Text('Periode ${i + 1}'),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
                           Padding(
                             padding: const EdgeInsets.only(
                               bottom: 16,
@@ -351,37 +452,54 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
                               hasil: h,
                               icon: icon,
                               color: color,
-                              subKategori: h.subKategori,
-                              isPrinting: isPrinting,
                               levelUser: levelUser,
                             ),
                           ),
                         ],
-                      ),
-                    );
-                  }),
-              ],
-            ),
-            const SizedBox(height: 70),
-          ],
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: ElevatedButton.icon(
-          onPressed: _captureAndPrint,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            minimumSize: const Size(double.infinity, 50),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+                      );
+                    }),
+                ],
+              ),
+              const SizedBox(height: 70),
+            ],
           ),
-          icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
-          label: const Text(
-            "Download PDF",
-            style: TextStyle(color: Colors.white),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: ElevatedButton.icon(
+            onPressed: () async {
+              final anakId = widget.hasilList.first.anakId;
+
+              final anak = await ref
+                  .read(anakNotifierProvider.notifier)
+                  .getAnakById(anakId);
+
+              // 🔹 Ambil semua soal sekaligus
+              final allKategoriSoal = await ref
+                  .read(stppaNotifierProvider.notifier)
+                  .fetchMultipleKategori(widget.hasilList);
+
+              // 🔹 Panggil generate report
+              await generateFullReport(
+                hasilList: widget.hasilList,
+                anak: anak,
+                kategoriSoalMap: allKategoriSoal,
+              );
+            },
+
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              minimumSize: const Size(double.infinity, 50),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
+            label: const Text(
+              "Download PDF",
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ),
       ),

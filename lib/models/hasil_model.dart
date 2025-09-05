@@ -16,10 +16,9 @@ class HasilModel with _$HasilModel {
     required String kategori,
     required String tanggal,
     required int usia,
-    required String contohMampu,
-    required String contohMampuBantuan,
-    required String contohBelumMampu,
-    required String subKategori,
+    required String kesimpulan,
+    required String rekomendasi,
+    required String jawaban,
   }) = _HasilModel;
 
   factory HasilModel.fromJson(Map<String, dynamic> json) =>

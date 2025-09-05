@@ -30,6 +30,7 @@ dependencies:
   pdf: ^3.11.3
   printing: ^5.14.2
   flutter_launcher_icons: ^0.14.4
+  double_tap_to_exit: ^1.0.3
 
 dev_dependencies:
   flutter_test:

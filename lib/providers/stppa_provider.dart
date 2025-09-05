@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../models/hasil_model.dart';
 import '../models/stppa_model.dart';
 import '../services/stppa_service.dart';
 import '../utils/provider.dart';
@@ -59,5 +60,42 @@ class StppaNotifier extends _$StppaNotifier {
 
   void setLoading() {
     state = const AsyncLoading();
+  }
+
+  Future<Map<String, List<StppaModel>>> fetchMultipleKategori(
+    List<HasilModel> hasilList,
+  ) async {
+    // 🔹 Ambil pasangan unik kategori + usia
+    final kategoriUsiaSet = {
+      for (final h in hasilList) '${h.kategori}|${h.usia}',
+    };
+
+    // 🔹 Siapkan list Future paralel
+    final futures = kategoriUsiaSet.map((ku) async {
+      final parts = ku.split('|');
+      final kategori = parts[0];
+      final usia = int.parse(parts[1]);
+
+      final result = await _stppaService.getAllStppaByKategori(kategori, usia);
+      if (result.isSuccess) {
+        return MapEntry('$kategori|$usia', result.resultValue ?? []);
+      } else {
+        throw Exception(result.errorMessage);
+      }
+    }).toList();
+
+    // 🔹 Tunggu semua sekaligus
+    final entries = await Future.wait(futures);
+
+    // 🔹 Gabungkan jadi Map<Kategori, List<StppaModel>>
+    final allKategoriSoal = <String, List<StppaModel>>{};
+    for (final e in entries) {
+      final parts = e.key.split('|');
+      final kategori = parts[0];
+      allKategoriSoal.putIfAbsent(kategori, () => []);
+      allKategoriSoal[kategori]!.addAll(e.value);
+    }
+
+    return allKategoriSoal;
   }
 }

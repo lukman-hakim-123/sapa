@@ -8,7 +8,7 @@ class StppaModel with _$StppaModel {
   factory StppaModel({
     required String id,
     required String kategori,
-    required String subKategori,
+    required String indikator,
     required int usia,
     required int nomor,
     required String pernyataan,
