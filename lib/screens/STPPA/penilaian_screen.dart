@@ -448,7 +448,7 @@ class PenilaianScreenState extends ConsumerState<PenilaianScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Hasil berhasil disimpan"),
+            content: Text("Penilaian berhasil disimpan"),
             backgroundColor: Colors.green,
           ),
         );

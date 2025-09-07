@@ -30,13 +30,27 @@ class DetailHasilScreen extends ConsumerStatefulWidget {
 
 class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
   int selectedPeriod = 1;
-  DateTime _parseTanggal(String t) {
-    final p = t.split('-');
-    if (p.length == 3) {
-      return DateTime(int.parse(p[2]), int.parse(p[1]), int.parse(p[0]));
-    }
-    return DateTime(1970, 1, 1);
-  }
+  final kategoriOrder = [
+    'Fisik Motorik',
+    'Bahasa',
+    'Sosial Emosional',
+    'Kognitif',
+    'Nilai Agama & Moral',
+  ];
+  final kategoriIcons = <String, String>{
+    'Fisik Motorik': 'assets/icons/fm.svg',
+    'Bahasa': 'assets/icons/bhs.svg',
+    'Sosial Emosional': 'assets/icons/se.svg',
+    'Kognitif': 'assets/icons/kg.svg',
+    'Nilai Agama & Moral': 'assets/icons/nam.svg',
+  };
+  final kategoriColors = <String, Color>{
+    'Fisik Motorik': Color(0xFFFFADAD),
+    'Bahasa': Color(0xFFC3D6FF),
+    'Sosial Emosional': Color(0xFFFF9DD8),
+    'Kognitif': Color(0xFFE596E6),
+    'Nilai Agama & Moral': Color(0xFFC7FFCA),
+  };
 
   Future<void> generateFullReport({
     required List<HasilModel> hasilList,
@@ -56,13 +70,15 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
       final jawaban = (jsonDecode(hasil.jawaban) as Map<String, dynamic>).map(
         (k, v) => MapEntry(int.parse(k), v as int),
       );
+      final String title =
+          'INSTRUMEN ASPEK PERKEMBANGAN ${hasil.kategori.toUpperCase()} UNTUK ANAK USIA ${(hasil.usia - 1).toString()}-${hasil.usia.toString()}';
 
       doc.addPage(
         pw.MultiPage(
           build: (context) => [
             pw.Center(
               child: pw.Text(
-                'INSTRUMEN ASPEK PERKEMBANGAN ${hasil.kategori.toUpperCase()} UNTUK ANAK USIA ${(hasil.usia - 1).toString()}-${hasil.usia.toString()}',
+                title,
                 textAlign: pw.TextAlign.center,
                 style: pw.TextStyle(
                   fontWeight: pw.FontWeight.bold,
@@ -104,7 +120,7 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
                       style: pw.TextStyle(font: tnrFont),
                     ),
                     pw.Text(
-                      ': ${anak.tanggalLahir}',
+                      ': ${anak.tempatLahir}, ${anak.tanggalLahir}',
                       style: pw.TextStyle(font: tnrFont),
                     ),
                   ],
@@ -123,6 +139,36 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
                     pw.Text('Alamat', style: pw.TextStyle(font: tnrFont)),
                     pw.Text(
                       ': ${anak.alamat}',
+                      style: pw.TextStyle(font: tnrFont),
+                    ),
+                  ],
+                ),
+                pw.TableRow(
+                  children: [
+                    pw.Text('Nama Ayah', style: pw.TextStyle(font: tnrFont)),
+                    pw.Text(
+                      ': ${anak.namaAyah}',
+                      style: pw.TextStyle(font: tnrFont),
+                    ),
+                  ],
+                ),
+                pw.TableRow(
+                  children: [
+                    pw.Text('Nama Ibu', style: pw.TextStyle(font: tnrFont)),
+                    pw.Text(
+                      ': ${anak.namaIbu}',
+                      style: pw.TextStyle(font: tnrFont),
+                    ),
+                  ],
+                ),
+                pw.TableRow(
+                  children: [
+                    pw.Text(
+                      'Tanggal Penilaian',
+                      style: pw.TextStyle(font: tnrFont),
+                    ),
+                    pw.Text(
+                      ': ${hasil.tanggal}',
                       style: pw.TextStyle(font: tnrFont),
                     ),
                   ],
@@ -291,10 +337,8 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
       byKategori[h.kategori]!.add(h);
     }
 
-    for (final list in byKategori.values) {
-      list.sort(
-        (a, b) => _parseTanggal(a.tanggal).compareTo(_parseTanggal(b.tanggal)),
-      );
+    for (final kategori in byKategori.keys) {
+      byKategori[kategori] = byKategori[kategori]!.reversed.toList();
     }
 
     final maxPeriods = byKategori.values.isEmpty
@@ -306,13 +350,7 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
     if (selectedPeriod > maxPeriods) {
       selectedPeriod = maxPeriods;
     }
-    final kategoriOrder = [
-      'Fisik Motorik',
-      'Bahasa',
-      'Sosial Emosional',
-      'Kognitif',
-      'Nilai Agama dan Moral',
-    ];
+
     final periodIndex = selectedPeriod - 1;
     final entriesThisPeriod = <HasilModel>[];
     for (final kategori in kategoriOrder) {
@@ -323,21 +361,6 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
     }
 
     final namaAnak = widget.hasilList.first.namaAnak;
-
-    final kategoriIcons = <String, String>{
-      'Fisik Motorik': 'assets/icons/fm.svg',
-      'Bahasa': 'assets/icons/bhs.svg',
-      'Sosial Emosional': 'assets/icons/se.svg',
-      'Kognitif': 'assets/icons/kg.svg',
-      'Nilai Agama dan Moral': 'assets/icons/nam.svg',
-    };
-    final kategoriColors = <String, Color>{
-      'Fisik Motorik': Color(0xFFFFADAD),
-      'Bahasa': Color(0xFFC3D6FF),
-      'Sosial Emosional': Color(0xFFFF9DD8),
-      'Kognitif': Color(0xFFC7FFCA),
-      'Nilai Agama dan Moral': Color(0xFFE596E6),
-    };
 
     return MyDoubleTapExit(
       child: Scaffold(
@@ -475,14 +498,12 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
                   .read(anakNotifierProvider.notifier)
                   .getAnakById(anakId);
 
-              // 🔹 Ambil semua soal sekaligus
               final allKategoriSoal = await ref
                   .read(stppaNotifierProvider.notifier)
-                  .fetchMultipleKategori(widget.hasilList);
+                  .fetchMultipleKategori(entriesThisPeriod);
 
-              // 🔹 Panggil generate report
               await generateFullReport(
-                hasilList: widget.hasilList,
+                hasilList: entriesThisPeriod,
                 anak: anak,
                 kategoriSoalMap: allKategoriSoal,
               );

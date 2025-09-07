@@ -111,56 +111,64 @@ class DetailAnakScreen extends ConsumerWidget {
                     child: Column(
                       children: [
                         const SizedBox(height: 8.0),
-                        _buildDetailCard('Tanggal Lahir', anak.tanggalLahir),
+                        _buildDetailCard(
+                          'Tempat, Tgl Lahir',
+                          "${anak.tempatLahir}, ${anak.tanggalLahir}",
+                        ),
                         _buildDetailCard(
                           'Usia',
                           '${anak.usia.toString()} Tahun',
                         ),
                         _buildDetailCard('Jenis Kelamin', anak.jenisKelamin),
                         _buildDetailCard('Alamat', anak.alamat),
+                        _buildDetailCard('Nama Ayah', anak.namaAyah),
+                        _buildDetailCard('Nama Ibu', anak.namaIbu),
                         const SizedBox(height: 8.0),
                       ],
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-        bottomNavigationBar: userProfileState.when(
-          data: (profile) {
-            final int userLevel = profile!.level_user;
+              userProfileState.when(
+                data: (profile) {
+                  final int userLevel = profile!.level_user;
 
-            return userLevel != 3
-                ? Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CustomButton(
-                          text: 'Edit Data',
-                          onPressed: () {
-                            GoRouter.of(context).push('/formAnak', extra: anak);
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        CustomButton(
-                          text: 'Hapus Data',
-                          onPressed: () => _deleteAnak(context, ref, anak),
-                          backgroundColor: Colors.red[700],
-                        ),
-                      ],
-                    ),
-                  )
-                : const SizedBox.shrink();
-          },
-          loading: () => const SizedBox(
-            height: 60,
-            child: Center(child: CircularProgressIndicator()),
-          ),
-          error: (e, _) => Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text('Error: $e'),
+                  return userLevel != 3
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CustomButton(
+                                text: 'Edit Data',
+                                onPressed: () {
+                                  GoRouter.of(
+                                    context,
+                                  ).push('/formAnak', extra: anak);
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              CustomButton(
+                                text: 'Hapus Data',
+                                onPressed: () =>
+                                    _deleteAnak(context, ref, anak),
+                                backgroundColor: Colors.red[700],
+                              ),
+                            ],
+                          ),
+                        )
+                      : const SizedBox.shrink();
+                },
+                loading: () => const SizedBox(
+                  height: 60,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (e, _) => Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text('Error: $e'),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -176,6 +184,7 @@ class DetailAnakScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               CustomText(text: title, fontWeight: FontWeight.bold),
+              const SizedBox(width: 16),
               Flexible(
                 child: CustomText(
                   text: value.isNotEmpty ? value : '-',

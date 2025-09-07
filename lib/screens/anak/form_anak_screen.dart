@@ -28,9 +28,12 @@ class FormAnakScreen extends ConsumerStatefulWidget {
 class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
   final _formKey = GlobalKey<FormState>();
   final _namaController = TextEditingController();
+  final _namaAyahController = TextEditingController();
+  final _namaIbuController = TextEditingController();
   final _alamatController = TextEditingController();
   final _emailController = TextEditingController();
   final _usiaController = TextEditingController();
+  final _tempatLahirController = TextEditingController();
   final _tanggalLahirController = TextEditingController();
   String? _tanggalLahir;
   File? _pickedImage;
@@ -42,10 +45,12 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
     super.initState();
     if (widget.anak != null) {
       _namaController.text = widget.anak!.nama;
+      _namaAyahController.text = widget.anak!.namaAyah;
+      _namaIbuController.text = widget.anak!.namaIbu;
       _alamatController.text = widget.anak!.alamat;
       _emailController.text = widget.anak!.email;
       _usiaController.text = widget.anak!.usia.toString();
-      _tanggalLahir = widget.anak!.tanggalLahir;
+      _tempatLahirController.text = widget.anak!.tempatLahir;
       _tanggalLahir = widget.anak!.tanggalLahir;
       _tanggalLahirController.text = _tanggalLahir!;
       gender = widget.anak!.jenisKelamin;
@@ -55,9 +60,12 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
   @override
   void dispose() {
     _namaController.dispose();
+    _namaAyahController.dispose();
+    _namaIbuController.dispose();
     _alamatController.dispose();
     _emailController.dispose();
     _usiaController.dispose();
+    _tempatLahirController.dispose();
     _tanggalLahirController.dispose();
     super.dispose();
   }
@@ -242,6 +250,23 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
                       ValidationHelper.validateNotEmpty(value, 'Nama Anak'),
                 ),
                 const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Icon(Icons.location_city, size: 25.0),
+                    CustomText(
+                      text: 'Tempat Lahir',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4.0),
+                CustomTextFormField(
+                  controller: _tempatLahirController,
+                  hintText: 'Tempat Lahir',
+                  validator: (value) =>
+                      ValidationHelper.validateNotEmpty(value, 'Tempat Lahir'),
+                ),
+                const SizedBox(height: 10),
                 IntrinsicHeight(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -380,6 +405,34 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
                 const SizedBox(height: 10),
                 Row(
                   children: [
+                    Icon(Icons.man, size: 25.0),
+                    CustomText(text: 'Nama Ayah', fontWeight: FontWeight.bold),
+                  ],
+                ),
+                const SizedBox(height: 4.0),
+                CustomTextFormField(
+                  controller: _namaAyahController,
+                  hintText: 'Nama Ayah',
+                  validator: (value) =>
+                      ValidationHelper.validateNotEmpty(value, 'Nama Ayah'),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Icon(Icons.woman, size: 25.0),
+                    CustomText(text: 'Nama Ibu', fontWeight: FontWeight.bold),
+                  ],
+                ),
+                const SizedBox(height: 4.0),
+                CustomTextFormField(
+                  controller: _namaIbuController,
+                  hintText: 'Nama Ibu',
+                  validator: (value) =>
+                      ValidationHelper.validateNotEmpty(value, 'Nama Ibu'),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
                     Icon(Icons.email, size: 25.0),
                     CustomText(text: 'Email', fontWeight: FontWeight.bold),
                   ],
@@ -430,8 +483,11 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
                                 final updatedModel = AnakModel(
                                   id: isEdit ? widget.anak!.id : '',
                                   nama: _namaController.text,
+                                  namaAyah: _namaAyahController.text,
+                                  namaIbu: _namaIbuController.text,
                                   alamat: _alamatController.text,
                                   email: _emailController.text,
+                                  tempatLahir: _tempatLahirController.text,
                                   usia: int.parse(_usiaController.text),
                                   tanggalLahir: _tanggalLahir!,
                                   guruId: user!.$id,
