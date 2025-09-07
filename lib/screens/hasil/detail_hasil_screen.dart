@@ -30,6 +30,7 @@ class DetailHasilScreen extends ConsumerStatefulWidget {
 
 class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
   int selectedPeriod = 1;
+  bool _isLoading = false;
   final kategoriOrder = [
     'Fisik Motorik',
     'Bahasa',
@@ -491,23 +492,34 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
         floatingActionButton: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: ElevatedButton.icon(
-            onPressed: () async {
-              final anakId = widget.hasilList.first.anakId;
+            onPressed: _isLoading
+                ? null
+                : () async {
+                    if (_isLoading) return;
 
-              final anak = await ref
-                  .read(anakNotifierProvider.notifier)
-                  .getAnakById(anakId);
+                    setState(() => _isLoading = true);
+                    try {
+                      final anakId = widget.hasilList.first.anakId;
 
-              final allKategoriSoal = await ref
-                  .read(stppaNotifierProvider.notifier)
-                  .fetchMultipleKategori(entriesThisPeriod);
+                      final anak = await ref
+                          .read(anakNotifierProvider.notifier)
+                          .getAnakById(anakId);
 
-              await generateFullReport(
-                hasilList: entriesThisPeriod,
-                anak: anak,
-                kategoriSoalMap: allKategoriSoal,
-              );
-            },
+                      final allKategoriSoal = await ref
+                          .read(stppaNotifierProvider.notifier)
+                          .fetchMultipleKategori(entriesThisPeriod);
+
+                      await generateFullReport(
+                        hasilList: entriesThisPeriod,
+                        anak: anak,
+                        kategoriSoalMap: allKategoriSoal,
+                      );
+                    } catch (e) {
+                      debugPrint('Gagal generate PDF: $e');
+                    } finally {
+                      setState(() => _isLoading = false);
+                    }
+                  },
 
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
@@ -516,9 +528,18 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
-            label: const Text(
-              "Download PDF",
+            icon: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Icon(Icons.picture_as_pdf, color: Colors.white),
+            label: Text(
+              _isLoading ? "Generating..." : "Download PDF",
               style: TextStyle(color: Colors.white),
             ),
           ),

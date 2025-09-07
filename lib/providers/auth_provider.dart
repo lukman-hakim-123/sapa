@@ -1,5 +1,6 @@
 import 'package:appwrite/models.dart' as models;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../services/user_profile_service.dart';
 import '../utils/provider.dart';
 import '../models/user_profile_model.dart';
 import '../services/auth_service.dart';
@@ -14,6 +15,10 @@ class Auth extends _$Auth {
   );
   late final UserProfileNotifier _userProfileNotifier = ref.read(
     userProfileNotifierProvider.notifier,
+  );
+  late final UserProfileService _userProfileService = UserProfileService(
+    db: ref.read(appwriteDatabaseProvider),
+    storage: ref.read(appwriteStorageProvider),
   );
 
   @override
@@ -62,7 +67,7 @@ class Auth extends _$Auth {
         level_user: 3,
       );
 
-      await _userProfileNotifier.createUserProfile(userProfile);
+      await _userProfileService.createUserProfile(userProfile);
 
       await login(email, password, fromRegister: true);
     } else {

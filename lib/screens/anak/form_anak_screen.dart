@@ -159,6 +159,7 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
 
     return MyDoubleTapExit(
       child: Scaffold(
+        backgroundColor: AppColors.background,
         appBar: AppBar(
           title: CustomText(
             text: isEdit ? 'Edit Anak' : 'Tambah Anak',

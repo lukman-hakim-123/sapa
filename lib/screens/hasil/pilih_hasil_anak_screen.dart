@@ -20,8 +20,6 @@ class PilihHasilAnakScreen extends ConsumerStatefulWidget {
 class _PilihHasilAnakScreenState extends ConsumerState<PilihHasilAnakScreen> {
   final TextEditingController searchController = TextEditingController();
   String searchQuery = '';
-  String searchDate = '';
-  bool isDateSelected = false;
 
   @override
   Widget build(BuildContext context) {
@@ -74,40 +72,6 @@ class _PilihHasilAnakScreenState extends ConsumerState<PilihHasilAnakScreen> {
                             ),
                           ),
                         ),
-                        Expanded(
-                          flex: 1,
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.calendar_month,
-                              color: isDateSelected
-                                  ? Colors.red
-                                  : AppColors.secondary,
-                              size: 40,
-                            ),
-                            onPressed: () async {
-                              if (isDateSelected) {
-                                setState(() {
-                                  searchDate = '';
-                                  isDateSelected = false;
-                                });
-                              } else {
-                                final selectedDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime(2000),
-                                  lastDate: DateTime(2100),
-                                );
-                                if (selectedDate != null) {
-                                  setState(() {
-                                    searchDate =
-                                        "${selectedDate.day.toString().padLeft(2, '0')}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.year}";
-                                    isDateSelected = true;
-                                  });
-                                }
-                              }
-                            },
-                          ),
-                        ),
                       ],
                     ),
                     const SizedBox(height: 10.0),
@@ -131,10 +95,8 @@ class _PilihHasilAnakScreenState extends ConsumerState<PilihHasilAnakScreen> {
                             final matchesName = hasil.namaAnak
                                 .toLowerCase()
                                 .contains(searchQuery);
-                            final matchesDate =
-                                searchDate.isEmpty ||
-                                hasil.tanggal == searchDate;
-                            return matchesName && matchesDate;
+
+                            return matchesName;
                           }).toList();
 
                           if (filtered.isEmpty) {
@@ -152,7 +114,6 @@ class _PilihHasilAnakScreenState extends ConsumerState<PilihHasilAnakScreen> {
                           final anakList = grouped.entries.map((entry) {
                             final anakResults = entry.value;
 
-                            // Urutkan berdasarkan tanggal (asumsi format dd-MM-yyyy)
                             anakResults.sort((a, b) {
                               final dateA = DateTime.parse(
                                 "${a.tanggal.split('-')[2]}-${a.tanggal.split('-')[1]}-${a.tanggal.split('-')[0]}",
@@ -160,13 +121,11 @@ class _PilihHasilAnakScreenState extends ConsumerState<PilihHasilAnakScreen> {
                               final dateB = DateTime.parse(
                                 "${b.tanggal.split('-')[2]}-${b.tanggal.split('-')[1]}-${b.tanggal.split('-')[0]}",
                               );
-                              return dateB.compareTo(dateA); // descending
+                              return dateB.compareTo(dateA);
                             });
 
-                            final latest =
-                                anakResults.first; // hasil paling baru
-                            final count =
-                                anakResults.length; // jumlah penilaian
+                            final latest = anakResults.first;
+                            final count = anakResults.length;
 
                             return {"hasil": latest, "count": count};
                           }).toList();
@@ -239,8 +198,11 @@ class _PilihHasilAnakScreenState extends ConsumerState<PilihHasilAnakScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      CustomText(text: 'Tgl: ${hasil.tanggal}'),
-                                      CustomText(text: 'Dinilai $count kali'),
+                                      CustomText(text: 'Dinilai: $count kali'),
+                                      CustomText(
+                                        text:
+                                            'Terakhir dinilai: ${hasil.tanggal}',
+                                      ),
                                     ],
                                   ),
                                   // trailing: IconButton(
