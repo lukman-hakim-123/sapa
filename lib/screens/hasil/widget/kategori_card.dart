@@ -126,6 +126,15 @@ class KategoriCard extends ConsumerWidget {
               padding: const EdgeInsets.all(8),
               child: JawabanPieChart(jawaban: parsedJawaban),
             ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(text: 'Keterangan:', fontWeight: FontWeight.bold),
+                _LegendItem(color: Colors.green, text: "Mampu"),
+                _LegendItem(color: Colors.orange, text: "Mampu dengan bantuan"),
+                _LegendItem(color: Colors.red, text: "Belum mampu"),
+              ],
+            ),
             const SizedBox(height: 12),
             Container(
               width: double.infinity,
@@ -163,6 +172,24 @@ class KategoriCard extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _LegendItem extends StatelessWidget {
+  final Color color;
+  final String text;
+
+  const _LegendItem({required this.color, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        CircleAvatar(radius: 6, backgroundColor: color),
+        const SizedBox(width: 4),
+        CustomText(text: text),
+      ],
     );
   }
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../services/anak_service.dart';
 import '../models/anak_model.dart';
+import '../services/hasil_service.dart';
 import '../utils/provider.dart';
 import 'user_profile_provider.dart';
 
@@ -13,6 +14,9 @@ class AnakNotifier extends _$AnakNotifier {
   late final AnakService _anakService = AnakService(
     db: ref.read(appwriteDatabaseProvider),
     storage: ref.read(appwriteStorageProvider),
+  );
+  late final HasilService _hasilService = HasilService(
+    db: ref.read(appwriteDatabaseProvider),
   );
 
   @override
@@ -86,12 +90,12 @@ class AnakNotifier extends _$AnakNotifier {
     }
   }
 
-  Future<AnakModel> getAnakById(String anakId) async {
+  Future<AnakModel?> getAnakById(String anakId) async {
     final result = await _anakService.getAnakById(anakId);
     if (result.isSuccess) {
       return result.resultValue!;
     } else {
-      throw Exception(result.errorMessage);
+      return null;
     }
   }
 
@@ -109,6 +113,12 @@ class AnakNotifier extends _$AnakNotifier {
         isCreate: false,
       );
 
+      if (oldAnak.email != updatedAnak.email) {
+        await _hasilService.updateEmailForHasil(
+          oldAnak.email,
+          updatedAnak.email,
+        );
+      }
       final result = await _anakService.updateAnak(finalAnak);
 
       if (result.isSuccess) {

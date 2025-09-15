@@ -184,7 +184,7 @@ class StppaScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
           child: Center(
             child: CustomText(
-              text: "$usia Tahun",
+              text: "${usia - 1}-$usia Tahun",
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.white,

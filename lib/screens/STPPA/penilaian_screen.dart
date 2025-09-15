@@ -105,7 +105,7 @@ class PenilaianScreenState extends ConsumerState<PenilaianScreen> {
                       Container(
                         height: 180,
                         decoration: BoxDecoration(
-                          color: AppColors.primary,
+                          color: const Color.fromARGB(255, 255, 161, 21),
                           borderRadius: BorderRadius.only(
                             bottomLeft: Radius.circular(16),
                             bottomRight: Radius.circular(16),
@@ -203,7 +203,7 @@ class PenilaianScreenState extends ConsumerState<PenilaianScreen> {
                       return Card(
                         margin: const EdgeInsets.symmetric(vertical: 8),
                         elevation: 2,
-                        color: AppColors.primary,
+                        color: const Color.fromARGB(255, 255, 161, 21),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -248,19 +248,19 @@ class PenilaianScreenState extends ConsumerState<PenilaianScreen> {
                                               q.nomor,
                                               3,
                                               "Mampu",
-                                              Colors.green,
+                                              Color.fromARGB(255, 132, 233, 0),
                                             ),
                                             _buildAnswerButton(
                                               q.nomor,
                                               2,
                                               "Mampu dengan Bantuan",
-                                              Colors.orange,
+                                              Color(0xFF5ce1e6),
                                             ),
                                             _buildAnswerButton(
                                               q.nomor,
                                               1,
                                               "Belum Mampu",
-                                              Colors.pink,
+                                              Color(0xFFff93b2),
                                             ),
                                           ],
                                         ),
@@ -406,23 +406,43 @@ class PenilaianScreenState extends ConsumerState<PenilaianScreen> {
     if (kesimpulanBuffer.isNotEmpty) kesimpulanBuffer.write(".");
     final kesimpulan = kesimpulanBuffer.toString();
 
-    final templates = [
+    final templatesBelum = [
       "Disarankan pembiasaan melalui kegiatan sehari-hari untuk ",
-      "Anak dapat distimulasi dengan permainan sederhana yang melatih ",
       "Orang tua perlu memberikan dukungan tambahan agar anak lebih terampil dalam ",
+    ];
+    final templatesBantuan = [
+      "Anak dapat distimulasi dengan permainan sederhana yang melatih ",
       "Perlu stimulasi lebih lanjut untuk mengembangkan ",
     ];
-    final randomPrefix = templates[Random().nextInt(templates.length)];
+    final randomPrefixBelum =
+        templatesBelum[Random().nextInt(templatesBelum.length)];
+    final randomPrefixBantuan =
+        templatesBantuan[Random().nextInt(templatesBantuan.length)];
 
     String rekomendasi = "";
     if (belum.isNotEmpty) {
-      final selectedBelum = belum.take(3).toList();
+      final selectedBelum = belum.toList();
       if (selectedBelum.length > 1) {
         final last = selectedBelum.removeLast();
-        rekomendasi = "$randomPrefix${selectedBelum.join(', ')} dan $last.";
+        rekomendasi +=
+            "$randomPrefixBelum${selectedBelum.join(', ')} dan $last.\n";
       } else {
-        rekomendasi = "$randomPrefix${selectedBelum.first}.";
+        rekomendasi += "$randomPrefixBelum${selectedBelum.first}.";
       }
+    }
+    if (bantuan.isNotEmpty) {
+      final selectedBantuan = bantuan.take(3).toList();
+      if (selectedBantuan.length > 1) {
+        final last = selectedBantuan.removeLast();
+        rekomendasi +=
+            "$randomPrefixBantuan${selectedBantuan.join(', ')} dan $last.\n";
+      } else {
+        rekomendasi += "$randomPrefixBantuan${selectedBantuan.first}.";
+      }
+    }
+
+    if (rekomendasi.isEmpty) {
+      rekomendasi = "Terus tingkatkan kemampuan yang sudah dikuasai anak.";
     }
 
     final jawabanJson = jsonEncode(jawabanMap);
@@ -441,6 +461,7 @@ class PenilaianScreenState extends ConsumerState<PenilaianScreen> {
       rekomendasi: rekomendasi,
       jawaban: jawabanJson,
     );
+    print(hasil);
 
     try {
       await ref.read(hasilNotifierProvider.notifier).createHasil(hasil);
@@ -493,7 +514,6 @@ class PenilaianScreenState extends ConsumerState<PenilaianScreen> {
           child: CustomText(
             text: label,
             fontSize: 12,
-            color: Colors.white,
             fontWeight: FontWeight.w600,
             textAlign: TextAlign.center,
           ),

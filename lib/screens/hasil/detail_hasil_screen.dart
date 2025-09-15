@@ -392,53 +392,46 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _LegendItem(color: Colors.green, text: "Mampu"),
-                            _LegendItem(
-                              color: Colors.orange,
-                              text: "Mampu dengan bantuan",
-                            ),
-                            _LegendItem(color: Colors.red, text: "Belum mampu"),
-                          ],
+                        // const Column(
+                        //   crossAxisAlignment: CrossAxisAlignment.start,
+                        //   children: [
+                        //     _LegendItem(color: Colors.green, text: "Mampu"),
+                        //     _LegendItem(
+                        //       color: Colors.orange,
+                        //       text: "Mampu dengan bantuan",
+                        //     ),
+                        //     _LegendItem(color: Colors.red, text: "Belum mampu"),
+                        //   ],
+                        // ),
+                        CustomText(
+                          text: namaAnak,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            CustomText(
-                              text: namaAnak,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            const SizedBox(height: 4.0),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.black12),
-                              ),
-                              child: DropdownButton<int>(
-                                value: selectedPeriod,
-                                underline: const SizedBox(),
-                                onChanged: (val) {
-                                  if (val != null) {
-                                    setState(() => selectedPeriod = val);
-                                  }
-                                },
-                                items: List.generate(
-                                  maxPeriods,
-                                  (i) => DropdownMenuItem(
-                                    value: i + 1,
-                                    child: Text('Periode ${i + 1}'),
-                                  ),
-                                ),
+                        const SizedBox(height: 4.0),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.black12),
+                          ),
+                          child: DropdownButton<int>(
+                            value: selectedPeriod,
+                            underline: const SizedBox(),
+                            onChanged: (val) {
+                              if (val != null) {
+                                setState(() => selectedPeriod = val);
+                              }
+                            },
+                            items: List.generate(
+                              maxPeriods,
+                              (i) => DropdownMenuItem(
+                                value: i + 1,
+                                child: Text('Periode ${i + 1}'),
                               ),
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
@@ -504,6 +497,14 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
                       final anak = await ref
                           .read(anakNotifierProvider.notifier)
                           .getAnakById(anakId);
+                      if (anak == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Data anak tidak ditemukan'),
+                          ),
+                        );
+                        return;
+                      }
 
                       final allKategoriSoal = await ref
                           .read(stppaNotifierProvider.notifier)
@@ -545,24 +546,6 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _LegendItem extends StatelessWidget {
-  final Color color;
-  final String text;
-
-  const _LegendItem({required this.color, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        CircleAvatar(radius: 6, backgroundColor: color),
-        const SizedBox(width: 4),
-        CustomText(text: text),
-      ],
     );
   }
 }
