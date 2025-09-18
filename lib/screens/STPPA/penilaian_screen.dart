@@ -394,25 +394,25 @@ class PenilaianScreenState extends ConsumerState<PenilaianScreen> {
     if (contohBantuan.isNotEmpty) {
       if (kesimpulanBuffer.isNotEmpty) kesimpulanBuffer.write(". ");
       kesimpulanBuffer.write(
-        "Dengan bantuan, anak sudah bisa ${contohBantuan.join(', ')}",
+        "Dengan bantuan, anak mampu ${contohBantuan.join(', ')}",
       );
     }
     if (contohBelum.isNotEmpty) {
       if (kesimpulanBuffer.isNotEmpty) kesimpulanBuffer.write(". ");
       kesimpulanBuffer.write(
-        "Namun, anak masih kesulitan dalam ${contohBelum.join(', ')}",
+        "Namun, anak belum mampu ${contohBelum.join(', ')}",
       );
     }
     if (kesimpulanBuffer.isNotEmpty) kesimpulanBuffer.write(".");
     final kesimpulan = kesimpulanBuffer.toString();
 
     final templatesBelum = [
-      "Disarankan pembiasaan melalui kegiatan sehari-hari untuk ",
-      "Orang tua perlu memberikan dukungan tambahan agar anak lebih terampil dalam ",
+      "Disarankan pembiasaan melalui kegiatan sehari-hari agar anak dapat ",
+      "Orang tua perlu memberikan dukungan tambahan agar anak dapat ",
     ];
     final templatesBantuan = [
-      "Anak dapat distimulasi dengan permainan sederhana yang melatih ",
-      "Perlu stimulasi lebih lanjut untuk mengembangkan ",
+      "Anak dapat distimulasi dengan permainan sederhana untuk membantu anak ",
+      "Perlu stimulasi lebih lanjut agar anak dapat ",
     ];
     final randomPrefixBelum =
         templatesBelum[Random().nextInt(templatesBelum.length)];
@@ -460,9 +460,8 @@ class PenilaianScreenState extends ConsumerState<PenilaianScreen> {
       kesimpulan: kesimpulan,
       rekomendasi: rekomendasi,
       jawaban: jawabanJson,
+      sekolah: anak.sekolah,
     );
-    print(hasil);
-
     try {
       await ref.read(hasilNotifierProvider.notifier).createHasil(hasil);
 

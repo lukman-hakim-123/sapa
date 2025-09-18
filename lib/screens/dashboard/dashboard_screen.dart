@@ -68,7 +68,7 @@ class DashboardScreen extends ConsumerWidget {
         data: (user) {
           return userProfileState.when(
             data: (profile) {
-              final int userLevel = profile!.level_user;
+              final int userLevel = profile!.levelUser;
               final lockedMenus = getLockedMenus(userLevel);
               final url = ref
                   .read(userProfileNotifierProvider.notifier)
@@ -158,11 +158,15 @@ class DashboardScreen extends ConsumerWidget {
                                         color: Colors.white,
                                       ),
                               ),
-                              const SizedBox(width: 16),
-                              CustomText(
-                                text: profile.nama,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                              const SizedBox(width: 8),
+                              SizedBox(
+                                width: 120,
+                                child: CustomText(
+                                  text: profile.nama,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  overflow: TextOverflow.clip,
+                                ),
                               ),
                             ],
                           ),

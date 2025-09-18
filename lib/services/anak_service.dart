@@ -33,6 +33,28 @@ class AnakService {
     }
   }
 
+  Future<Result<List<AnakModel>>> getAllAnakBySekolah(String sekolah) async {
+    try {
+      final documents = await _db.listDocuments(
+        databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
+        collectionId: dotenv.env['APPWRITE_ANAK_COLLECTION_ID']!,
+        queries: [
+          Query.orderDesc("\$createdAt"),
+          Query.equal('sekolah', sekolah),
+        ],
+      );
+      final anakList = documents.documents.map((doc) {
+        final Map<String, dynamic> data = Map<String, dynamic>.from(doc.data);
+        data['id'] = data['\$id'];
+        data.remove('\$id');
+        return AnakModel.fromJson(data);
+      }).toList();
+      return Result.success(anakList);
+    } catch (e) {
+      return Result.failed(e.toString());
+    }
+  }
+
   Future<Result<List<AnakModel>>> getAllAnak() async {
     try {
       final documents = await _db.listDocuments(

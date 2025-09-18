@@ -174,6 +174,15 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
                     ),
                   ],
                 ),
+                pw.TableRow(
+                  children: [
+                    pw.Text('Nama Sekolah', style: pw.TextStyle(font: tnrFont)),
+                    pw.Text(
+                      ': ${hasil.sekolah}',
+                      style: pw.TextStyle(font: tnrFont),
+                    ),
+                  ],
+                ),
               ],
             ),
 
@@ -310,7 +319,7 @@ class _DetailHasilScreenState extends ConsumerState<DetailHasilScreen> {
     // ignore: unused_local_variable
     final hasilState = ref.watch(hasilNotifierProvider);
     final userProfile = ref.watch(userProfileNotifierProvider);
-    final levelUser = userProfile.value?.level_user ?? 3;
+    final levelUser = userProfile.value?.levelUser ?? 3;
     if (widget.hasilList.isEmpty) {
       return Scaffold(
         backgroundColor: AppColors.background,

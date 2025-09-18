@@ -123,6 +123,7 @@ class DetailAnakScreen extends ConsumerWidget {
                         _buildDetailCard('Alamat', anak.alamat),
                         _buildDetailCard('Nama Ayah', anak.namaAyah),
                         _buildDetailCard('Nama Ibu', anak.namaIbu),
+                        _buildDetailCard('Nama Sekolah', anak.sekolah),
                         const SizedBox(height: 8.0),
                       ],
                     ),
@@ -131,7 +132,7 @@ class DetailAnakScreen extends ConsumerWidget {
               ),
               userProfileState.when(
                 data: (profile) {
-                  final int userLevel = profile!.level_user;
+                  final int userLevel = profile!.levelUser;
 
                   return userLevel != 3
                       ? Padding(

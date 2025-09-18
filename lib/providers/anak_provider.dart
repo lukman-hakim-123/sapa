@@ -33,7 +33,7 @@ class AnakNotifier extends _$AnakNotifier {
     final profile = profileAsync.value;
     if (profile == null) return [];
 
-    final level = profile.level_user;
+    final level = profile.levelUser;
     if (level == 2) {
       final result = await _anakService.getAnakByGuru(profile.id);
       if (result.isSuccess) {
@@ -43,6 +43,13 @@ class AnakNotifier extends _$AnakNotifier {
       }
     } else if (level == 3) {
       final result = await _anakService.getAnakByEmail(profile.email);
+      if (result.isSuccess) {
+        return result.resultValue ?? [];
+      } else {
+        throw Exception(result.errorMessage);
+      }
+    } else if (level == 1) {
+      final result = await _anakService.getAllAnakBySekolah(profile.sekolah);
       if (result.isSuccess) {
         return result.resultValue ?? [];
       } else {

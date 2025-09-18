@@ -201,11 +201,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                             if (shouldLogout == true) {
                               await ref.read(authProvider.notifier).logout();
-                              // await Future.delayed(
-                              //   const Duration(milliseconds: 300),
-                              // );
-                              // ignore: use_build_context_synchronously
-                              context.go('/login');
+                              if (context.mounted) {
+                                context.go('/login');
+                              }
                             }
                           },
                         ),
@@ -329,6 +327,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         const SizedBox(height: 4),
                         CustomTextFormField(
                           controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
                           validator: (value) =>
                               ValidationHelper.validateEmail(value),
                         ),
@@ -469,7 +468,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                         nama: _namaController.text,
                                         email: _emailController.text,
                                         foto: profile.foto,
-                                        level_user: profile.level_user,
+                                        levelUser: profile.levelUser,
+                                        sekolah: profile.sekolah,
                                       ),
                                       photoFile: _pickedImage,
                                       oldPassword:

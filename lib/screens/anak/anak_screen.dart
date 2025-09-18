@@ -48,7 +48,7 @@ class _AnakScreenState extends ConsumerState<AnakScreen> {
         ),
         body: userProfileState.when(
           data: (profile) {
-            final int userLevel = profile!.level_user;
+            final int userLevel = profile!.levelUser;
             return RefreshIndicator(
               onRefresh: () async {
                 ref.invalidate(anakNotifierProvider);

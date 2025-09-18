@@ -10,7 +10,10 @@ class UserProfile with _$UserProfile {
     required String nama,
     required String email,
     required String foto,
-    required int level_user,
+    required int levelUser,
+    required String sekolah,
+    String? $createdAt,
+    String? $updatedAt,
   }) = _UserProfile;
 
   factory UserProfile.fromJson(Map<String, dynamic> json) =>

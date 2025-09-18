@@ -64,7 +64,8 @@ class Auth extends _$Auth {
         nama: nama,
         email: email,
         foto: '',
-        level_user: 3,
+        levelUser: 3,
+        sekolah: '',
       );
 
       await _userProfileService.createUserProfile(userProfile);

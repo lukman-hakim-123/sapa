@@ -54,6 +54,28 @@ class HasilService {
     }
   }
 
+  Future<Result<List<HasilModel>>> getAllHasilBySekolah(String sekolah) async {
+    try {
+      final documents = await _db.listDocuments(
+        databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
+        collectionId: dotenv.env['APPWRITE_HASIL_COLLECTION_ID']!,
+        queries: [
+          Query.orderDesc("\$createdAt"),
+          Query.equal('sekolah', sekolah),
+        ],
+      );
+      final hasilList = documents.documents.map((doc) {
+        final Map<String, dynamic> data = Map<String, dynamic>.from(doc.data);
+        data['id'] = data['\$id'];
+        data.remove('\$id');
+        return HasilModel.fromJson(data);
+      }).toList();
+      return Result.success(hasilList);
+    } catch (e) {
+      return Result.failed(e.toString());
+    }
+  }
+
   Future<Result<List<HasilModel>>> getAllHasil() async {
     try {
       final documents = await _db.listDocuments(

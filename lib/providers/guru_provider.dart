@@ -5,6 +5,7 @@ import 'package:sapa/models/user_profile_model.dart';
 import '../services/auth_service.dart';
 import '../services/guru_service.dart';
 import '../utils/provider.dart';
+import 'user_profile_provider.dart';
 part 'guru_provider.g.dart';
 
 @riverpod
@@ -19,11 +20,33 @@ class GuruNotifier extends _$GuruNotifier {
 
   @override
   Future<List<UserProfile>> build() async {
-    final result = await _guruService.getAllGuru();
-    if (result.isSuccess) {
-      return result.resultValue ?? [];
+    final profileAsync = ref.watch(userProfileNotifierProvider);
+
+    if (profileAsync.isLoading) {
+      state = const AsyncValue.loading();
+    }
+    if (profileAsync.hasError) {
+      throw profileAsync.error!;
+    }
+
+    final profile = profileAsync.value;
+    if (profile == null) return [];
+
+    final level = profile.levelUser;
+    if (level == 1) {
+      final result = await _guruService.getAllGuruBySekolah(profile.sekolah);
+      if (result.isSuccess) {
+        return result.resultValue ?? [];
+      } else {
+        throw Exception(result.errorMessage);
+      }
     } else {
-      throw Exception(result.errorMessage);
+      final result = await _guruService.getAllGuru();
+      if (result.isSuccess) {
+        return result.resultValue ?? [];
+      } else {
+        throw Exception(result.errorMessage);
+      }
     }
   }
 
@@ -31,6 +54,7 @@ class GuruNotifier extends _$GuruNotifier {
     String nama,
     String email,
     String password,
+    String sekolah,
     File photoFile,
   ) async {
     state = const AsyncValue.loading();
@@ -54,7 +78,8 @@ class GuruNotifier extends _$GuruNotifier {
         nama: nama,
         email: email,
         foto: '',
-        level_user: 2,
+        levelUser: 2,
+        sekolah: sekolah,
       );
 
       final finalGuru = await _uploadPhoto(

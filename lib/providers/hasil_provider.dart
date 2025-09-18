@@ -29,15 +29,22 @@ class HasilNotifier extends _$HasilNotifier {
     final profile = profileAsync.value;
     if (profile == null) return [];
 
-    if (profile.level_user == 2) {
+    if (profile.levelUser == 2) {
       final result = await _hasilService.getAllHasilByGuruId(profile.id);
       if (result.isSuccess) {
         return result.resultValue ?? [];
       } else {
         throw Exception(result.errorMessage);
       }
-    } else if (profile.level_user == 3) {
+    } else if (profile.levelUser == 3) {
       final result = await _hasilService.getAllHasilByEmail(profile.email);
+      if (result.isSuccess) {
+        return result.resultValue ?? [];
+      } else {
+        throw Exception(result.errorMessage);
+      }
+    } else if (profile.levelUser == 1) {
+      final result = await _hasilService.getAllHasilBySekolah(profile.sekolah);
       if (result.isSuccess) {
         return result.resultValue ?? [];
       } else {

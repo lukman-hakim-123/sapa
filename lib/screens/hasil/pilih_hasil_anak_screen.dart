@@ -227,8 +227,11 @@ class _PilihHasilAnakScreenState extends ConsumerState<PilihHasilAnakScreen> {
                             },
                           );
                         },
-                        loading: () =>
-                            const Center(child: CircularProgressIndicator()),
+                        loading: () => Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.secondary,
+                          ),
+                        ),
                         error: (error, _) =>
                             Center(child: Text('Terjadi kesalahan: $error')),
                       ),
@@ -238,7 +241,9 @@ class _PilihHasilAnakScreenState extends ConsumerState<PilihHasilAnakScreen> {
               ),
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => Center(
+            child: CircularProgressIndicator(color: AppColors.secondary),
+          ),
           error: (error, _) => Center(child: Text('Error: $error')),
         ),
       ),

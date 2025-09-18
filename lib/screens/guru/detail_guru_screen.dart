@@ -91,7 +91,7 @@ class DetailGuruScreen extends ConsumerWidget {
                         const SizedBox(height: 8.0),
                         _buildDetailCard('Nama Guru', guru.nama),
                         _buildDetailCard('Email', guru.email),
-
+                        _buildDetailCard('Nama Sekolah', guru.sekolah),
                         const SizedBox(height: 8.0),
                       ],
                     ),

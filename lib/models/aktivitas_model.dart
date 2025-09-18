@@ -6,7 +6,8 @@ class AktivitasModel {
   final String deskripsi;
   final String namaAnak;
   final String imageId;
-  final String tanggal;
+  final DateTime $createdAt;
+  final DateTime $updatedAt;
 
   AktivitasModel({
     required this.id,
@@ -15,6 +16,7 @@ class AktivitasModel {
     required this.deskripsi,
     required this.namaAnak,
     required this.imageId,
-    required this.tanggal,
+    required this.$createdAt,
+    required this.$updatedAt,
   });
 }

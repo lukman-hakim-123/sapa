@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../models/user_profile_model.dart';
 import '../../providers/guru_provider.dart';
+import '../../providers/user_profile_provider.dart';
 import '../../utils/validation_helper.dart';
 import '../../widgets/app_colors.dart';
 import '../../widgets/custom_button.dart';
@@ -313,13 +314,27 @@ class _FormGuruScreenState extends ConsumerState<FormGuruScreen> {
                               return;
                             }
                             setState(() => _isSubmitting = true);
+                            final profile = ref
+                                .read(userProfileNotifierProvider)
+                                .value;
+                            if (profile == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Profile belum dimuat'),
+                                ),
+                              );
+                              return;
+                            }
+
+                            final sekolah = profile.sekolah;
                             if (isEdit) {
                               final UserProfile updatedModel = UserProfile(
                                 id: widget.guru!.id,
                                 email: widget.guru!.email,
                                 foto: widget.guru!.foto,
-                                level_user: 2,
+                                levelUser: 2,
                                 nama: _namaController.text,
+                                sekolah: sekolah,
                               );
                               ref
                                   .read(guruNotifierProvider.notifier)
@@ -335,6 +350,7 @@ class _FormGuruScreenState extends ConsumerState<FormGuruScreen> {
                                     _namaController.text,
                                     _emailController.text,
                                     _passwordLamaController.text,
+                                    sekolah,
                                     _pickedImage!,
                                   );
                             }

@@ -33,12 +33,31 @@ class GuruService {
     }
   }
 
+  Future<Result<List<UserProfile>>> getAllGuruBySekolah(String sekolah) async {
+    try {
+      final documents = await _db.listDocuments(
+        databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
+        collectionId: dotenv.env['APPWRITE_USERS_COLLECTION_ID']!,
+        queries: [Query.equal('levelUser', 2), Query.equal('sekolah', sekolah)],
+      );
+      final guruList = documents.documents.map((doc) {
+        final Map<String, dynamic> data = Map<String, dynamic>.from(doc.data);
+        data['id'] = data['\$id'];
+        data.remove('\$id');
+        return UserProfile.fromJson(data);
+      }).toList();
+      return Result.success(guruList);
+    } catch (e) {
+      return Result.failed(e.toString());
+    }
+  }
+
   Future<Result<List<UserProfile>>> getAllGuru() async {
     try {
       final documents = await _db.listDocuments(
         databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
         collectionId: dotenv.env['APPWRITE_USERS_COLLECTION_ID']!,
-        queries: [Query.equal('level_user', 2)],
+        queries: [Query.equal('levelUser', 2)],
       );
       final guruList = documents.documents.map((doc) {
         final Map<String, dynamic> data = Map<String, dynamic>.from(doc.data);

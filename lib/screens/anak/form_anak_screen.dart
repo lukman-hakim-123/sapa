@@ -8,8 +8,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/anak_model.dart';
-import '../../providers/auth_provider.dart';
 import '../../providers/anak_provider.dart';
+import '../../providers/user_profile_provider.dart';
 import '../../utils/validation_helper.dart';
 import '../../widgets/app_colors.dart';
 import '../../widgets/custom_button.dart';
@@ -115,7 +115,7 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
   @override
   Widget build(BuildContext context) {
     final anakState = ref.watch(anakNotifierProvider);
-    final authState = ref.watch(authProvider);
+    final userProfile = ref.watch(userProfileNotifierProvider);
     final url = ref.read(anakNotifierProvider.notifier).getPublicImageUrl;
     final isEdit = widget.anak != null;
 
@@ -475,12 +475,17 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
                               );
                               return;
                             }
-                            final tanggal = DateFormat(
-                              'dd-MM-yyyy',
-                            ).format(DateTime.now());
                             setState(() => _isSubmitting = true);
-                            authState.when(
-                              data: (user) {
+                            userProfile.when(
+                              data: (profile) {
+                                if (profile == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Profile tidak ditemukan'),
+                                    ),
+                                  );
+                                  return;
+                                }
                                 final updatedModel = AnakModel(
                                   id: isEdit ? widget.anak!.id : '',
                                   nama: _namaController.text,
@@ -491,10 +496,10 @@ class _FormAnakScreenState extends ConsumerState<FormAnakScreen> {
                                   tempatLahir: _tempatLahirController.text,
                                   usia: int.parse(_usiaController.text),
                                   tanggalLahir: _tanggalLahir!,
-                                  guruId: user!.$id,
+                                  guruId: profile.id,
                                   jenisKelamin: gender!,
                                   imageId: '',
-                                  tanggal: tanggal,
+                                  sekolah: profile.sekolah,
                                 );
                                 if (isEdit) {
                                   ref

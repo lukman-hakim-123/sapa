@@ -19,6 +19,9 @@ class HasilModel with _$HasilModel {
     required String kesimpulan,
     required String rekomendasi,
     required String jawaban,
+    required String sekolah,
+    String? $createdAt,
+    String? $updatedAt,
   }) = _HasilModel;
 
   factory HasilModel.fromJson(Map<String, dynamic> json) =>
