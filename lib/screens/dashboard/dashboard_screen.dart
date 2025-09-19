@@ -44,7 +44,7 @@ class DashboardScreen extends ConsumerWidget {
       'icon': 'assets/icons/add admin.svg',
       'label': 'Tambah Admin',
       'route': '/admin',
-      'color': Color(0xFFB39DDB),
+      'color': Color.fromARGB(255, 219, 199, 255),
       'sub': 'tambah akun admin/kepala sekolah',
     },
   ];
