@@ -2,27 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/user_profile_model.dart';
-import '../../providers/guru_provider.dart';
+import '../../providers/admin_provider.dart';
 import '../../widgets/app_colors.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text.dart';
 import '../../widgets/my_double_tap_exit.dart';
 
-class DetailGuruScreen extends ConsumerWidget {
-  final UserProfile guru;
+class DetailAdminScreen extends ConsumerWidget {
+  final UserProfile admin;
 
-  const DetailGuruScreen({super.key, required this.guru});
+  const DetailAdminScreen({super.key, required this.admin});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final url = ref.read(guruNotifierProvider.notifier).getPublicImageUrl;
+    final url = ref.read(adminNotifierProvider.notifier).getPublicImageUrl;
 
     return MyDoubleTapExit(
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
           title: CustomText(
-            text: 'Detail Guru',
+            text: 'Detail Admin',
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 20.0,
@@ -31,7 +31,7 @@ class DetailGuruScreen extends ConsumerWidget {
           backgroundColor: AppColors.primary,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => context.go('/guru'),
+            onPressed: () => context.go('/admin'),
           ),
         ),
         body: SingleChildScrollView(
@@ -46,7 +46,7 @@ class DetailGuruScreen extends ConsumerWidget {
                     backgroundColor: Colors.grey[200],
                     child: ClipOval(
                       child: Image.network(
-                        url(guru.foto),
+                        url(admin.foto),
                         fit: BoxFit.cover,
                         width: 100,
                         height: 100,
@@ -71,8 +71,8 @@ class DetailGuruScreen extends ConsumerWidget {
                         },
                         errorBuilder: (context, error, stackTrace) =>
                             const Icon(
-                              Icons.error,
-                              color: Colors.red,
+                              Icons.person,
+                              color: Colors.grey,
                               size: 40,
                             ),
                       ),
@@ -89,9 +89,9 @@ class DetailGuruScreen extends ConsumerWidget {
                     child: Column(
                       children: [
                         const SizedBox(height: 8.0),
-                        _buildDetailCard('Nama Guru', guru.nama),
-                        _buildDetailCard('Email', guru.email),
-                        _buildDetailCard('Nama Sekolah', guru.sekolah),
+                        _buildDetailCard('Nama Admin', admin.nama),
+                        _buildDetailCard('Email', admin.email),
+                        _buildDetailCard('Nama Sekolah', admin.sekolah),
                         const SizedBox(height: 8.0),
                       ],
                     ),
@@ -109,13 +109,13 @@ class DetailGuruScreen extends ConsumerWidget {
               CustomButton(
                 text: 'Edit Data',
                 onPressed: () {
-                  GoRouter.of(context).push('/formGuru', extra: guru);
+                  GoRouter.of(context).push('/formAdmin', extra: admin);
                 },
               ),
               const SizedBox(height: 16),
               CustomButton(
                 text: 'Hapus Data',
-                onPressed: () => _deleteGuru(context, ref, guru),
+                onPressed: () => _deleteAdmin(context, ref, admin),
                 backgroundColor: Colors.red[700],
               ),
             ],
@@ -149,16 +149,18 @@ class DetailGuruScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _deleteGuru(
+  Future<void> _deleteAdmin(
     BuildContext context,
     WidgetRef ref,
-    UserProfile guru,
+    UserProfile admin,
   ) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Hapus Guru'),
-        content: const Text('Apakah Anda yakin ingin menghapus data guru ini?'),
+        title: const Text('Hapus Admin'),
+        content: const Text(
+          'Apakah Anda yakin ingin menghapus data Admin ini?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -173,11 +175,13 @@ class DetailGuruScreen extends ConsumerWidget {
     );
 
     if (confirm == true) {
-      await ref.read(guruNotifierProvider.notifier).deleteGuru(guru);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Data guru berhasil dihapus')),
-      );
-      context.go('/guru');
+      await ref.read(adminNotifierProvider.notifier).deleteAdmin(admin);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Data Admin berhasil dihapus')),
+        );
+        context.go('/admin');
+      }
     }
   }
 }

@@ -1,7 +1,10 @@
 import 'package:go_router/go_router.dart';
 import 'package:sapa/models/hasil_model.dart';
+import 'package:sapa/screens/admin/form_admin_screen.dart';
 import '../models/anak_model.dart';
 import '../models/user_profile_model.dart';
+import '../screens/admin/admin_screen.dart';
+import '../screens/admin/detail_admin_screen.dart';
 import '../screens/hasil/detail_hasil_screen.dart';
 import '../screens/hasil/pilih_hasil_anak_screen.dart';
 import '../screens/stppa/penilaian_screen.dart';
@@ -68,6 +71,21 @@ final router = GoRouter(
       builder: (context, state) {
         final guru = state.extra as UserProfile;
         return DetailGuruScreen(guru: guru);
+      },
+    ),
+    GoRoute(path: '/admin', builder: (context, state) => const AdminScreen()),
+    GoRoute(
+      path: '/formAdmin',
+      builder: (context, state) {
+        final admin = state.extra as UserProfile?;
+        return FormAdminScreen(admin: admin);
+      },
+    ),
+    GoRoute(
+      path: '/detailAdmin',
+      builder: (context, state) {
+        final admin = state.extra as UserProfile;
+        return DetailAdminScreen(admin: admin);
       },
     ),
     GoRoute(path: '/stppa', builder: (context, state) => const StppaScreen()),

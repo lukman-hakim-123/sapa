@@ -40,6 +40,13 @@ class DashboardScreen extends ConsumerWidget {
       'color': Color(0xFFD5C4B0),
       'sub': 'tambah akun guru',
     },
+    {
+      'icon': 'assets/icons/add admin.svg',
+      'label': 'Tambah Admin',
+      'route': '/admin',
+      'color': Color(0xFFB39DDB),
+      'sub': 'tambah akun admin/kepala sekolah',
+    },
   ];
 
   List<int> getLockedMenus(int userLevel) {
@@ -73,6 +80,14 @@ class DashboardScreen extends ConsumerWidget {
               final url = ref
                   .read(userProfileNotifierProvider.notifier)
                   .getPublicImageUrl;
+
+              final filteredMenuItems = menuItems.where((item) {
+                if (item['label'] == 'Tambah Admin' && userLevel != 0) {
+                  return false;
+                }
+                return true;
+              }).toList();
+
               return SingleChildScrollView(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Column(
@@ -196,9 +211,9 @@ class DashboardScreen extends ConsumerWidget {
                               crossAxisSpacing: 16,
                               mainAxisSpacing: 16,
                             ),
-                        itemCount: menuItems.length,
+                        itemCount: filteredMenuItems.length,
                         itemBuilder: (context, index) {
-                          final item = menuItems[index];
+                          final item = filteredMenuItems[index];
                           final isLocked = lockedMenus.contains(index);
                           return GestureDetector(
                             onTap: () {
