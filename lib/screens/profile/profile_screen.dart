@@ -160,55 +160,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                       ),
                       Positioned(
-                        top: 55,
-                        right: 16,
-                        child: IconButton(
-                          icon: Icon(Icons.logout, color: Colors.red),
-                          onPressed: () async {
-                            final shouldLogout = await showDialog<bool>(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: CustomText(
-                                  text: 'Konfirmasi Logout',
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                content: CustomText(
-                                  text: 'Apakah Anda yakin ingin logout?',
-                                  fontSize: 16,
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(false),
-                                    child: CustomText(
-                                      text: 'Batal',
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(true),
-                                    child: CustomText(
-                                      text: 'Ya',
-                                      color: Colors.red,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-
-                            if (shouldLogout == true) {
-                              await ref.read(authProvider.notifier).logout();
-                              if (context.mounted) {
-                                context.go('/login');
-                              }
-                            }
-                          },
-                        ),
-                      ),
-                      Positioned(
                         bottom: -45,
                         left: 0,
                         right: 0,
