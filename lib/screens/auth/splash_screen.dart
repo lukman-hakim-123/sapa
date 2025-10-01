@@ -22,8 +22,10 @@ class SplashScreenState extends ConsumerState<SplashScreen> {
     await Future.delayed(const Duration(seconds: 1)); // Simulate loading
     final authState = ref.read(authProvider);
     if (authState.value != null) {
+      if(!mounted)return;
       context.go('/bottomNav');
     } else {
+      if(!mounted)return;
       context.go('/login');
     }
   }

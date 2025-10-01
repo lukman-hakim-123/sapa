@@ -17,13 +17,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brightness = View.of(context).platformDispatcher.platformBrightness;
     TextTheme textTheme = createTextTheme(context, "Adamina", "Philosopher");
     MaterialTheme theme = MaterialTheme(textTheme);
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'My Flutter App',
-      theme: brightness == Brightness.light ? theme.light() : theme.dark(),
+      title: 'SAPA',
+      theme: theme.light(),
       routerConfig: router,
     );
   }
