@@ -245,7 +245,7 @@ class _FormAdminScreenState extends ConsumerState<FormAdminScreen> {
                               ]),
                         ),
                   isEdit ? Container() : const SizedBox(height: 10),
-                  Row(
+                  isEdit ? Container() :Row(
                     children: [
                       Icon(Icons.location_city, size: 25.0),
                       CustomText(
@@ -254,8 +254,8 @@ class _FormAdminScreenState extends ConsumerState<FormAdminScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4.0),
-                  CustomTextFormField(
+                  isEdit ? Container() :const SizedBox(height: 4.0),
+                  isEdit ? Container() :CustomTextFormField(
                     controller: _sekolahController,
                     hintText: 'Nama Sekolah',
                     validator: (value) => ValidationHelper.validateNotEmpty(

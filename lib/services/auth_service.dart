@@ -63,9 +63,10 @@ class AuthService implements IAuthService {
     } on AppwriteException catch (e) {
       String message;
 
-      if (e.code == 401) {
-        message = 'Email atau password salah';
-      } else if (e.code == 429) {
+      // if (e.code == 401) {
+      //   message = 'Email atau password salah';
+      // } else
+      if (e.code == 429) {
         message = 'Terlalu banyak percobaan. Mohon tunggu beberapa saat.';
       } else {
         message = e.message ?? 'Terjadi kesalahan, coba lagi nanti';

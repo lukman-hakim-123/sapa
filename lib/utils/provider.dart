@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 part 'provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 Client appwriteClient(Ref ref) {
   return Client()
     ..setEndpoint(dotenv.env['APPWRITE_ENDPOINT']!)

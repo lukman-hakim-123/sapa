@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sapa/widgets/custom_button.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../models/user_profile_model.dart';
 import '../../providers/auth_provider.dart';
@@ -156,6 +157,55 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
+                        ),
+                      ),
+                      Positioned(
+                        top: 55,
+                        right: 16,
+                        child: IconButton(
+                          icon: Icon(Icons.logout, color: Colors.red),
+                          onPressed: () async {
+                            final shouldLogout = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: CustomText(
+                                  text: 'Konfirmasi Logout',
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                content: CustomText(
+                                  text: 'Apakah Anda yakin ingin logout?',
+                                  fontSize: 16,
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(false),
+                                    child: CustomText(
+                                      text: 'Batal',
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(true),
+                                    child: CustomText(
+                                      text: 'Ya',
+                                      color: Colors.red,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                            if (shouldLogout == true) {
+                              await ref.read(authProvider.notifier).logout();
+                              if (context.mounted) {
+                                context.go('/login');
+                              }
+                            }
+                          },
                         ),
                       ),
                       Positioned(
